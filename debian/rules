@@ -1,0 +1,414 @@
+#
+# Copyright (C) 2006-2012 Opersys inc.
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License, not any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#!/usr/bin/make -f
+
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+export DH_VERBOSE=1
+
+CFLAGS = -Wall -g
+
+PACKAGE_VERSION:=$(shell dpkg-parsechangelog -ldebian/changelog | grep '^Version:' | awk '{print $$2}')
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+CFLAGS += -O0
+else
+CFLAGS += -O2
+endif
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	touch configure-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	-rm -f /tmp/tbxsosd.sconsign.dblite
+	-rm -f build.conf
+	-rm debian/tbxsosd-kos.preinst debian/tbxsosd-kos.postrm
+	-rm debian/tbxsosd-tbxsos.preinst debian/tbxsosd-tbxsos.postrm
+	-rm debian/tbxsosd-keyserver.preinst debian/tbxsosd-keyserver.postrm
+	-rm debian/tbxsosd-full.preinst debian/tbxsosd-full.postrm
+# Reestablish a correct build.conf before potentially building again.
+	scons install \
+			libktools_libpath=/usr/lib \
+			libktools_include=/usr/include/libktools \
+			tagcrypt_libpath=/usr/lib \
+			tagcrypt_include=/usr/include/tagcrypt -c
+	-rm -f .sconsign.dblite .sconsign
+	-rm -f build-stamp configure-stamp
+	dh_clean
+
+# Teambox Online Server build.
+build-kos: build-kos-stamp
+build-kos-stamp: configure-stamp
+	dh_testdir
+	scons -c
+	scons build_type=kos debug=0 db_debug=0
+
+	sed s/@PKG_NAME@/tbxsosd-kos/ debian/default.preinst.in \
+		> debian/tbxsosd-kos.preinst
+	sed s/@PKG_NAME@/tbxsosd-kos/ debian/default.postrm.in \
+		> debian/tbxsosd-kos.postrm
+
+	touch $@
+
+install-kos: config_dir=$(CURDIR)/debian/tbxsosd-kos/usr/share/teambox/tbxsosd/config-stock/
+install-kos: config_file=$(config_dir)/tbxsosd.conf
+install-kos: build-kos
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs -ptbxsosd-kos
+	scons install \
+			libktools_include=/usr/include/libktools \
+			libktools_libpath=/usr/lib \
+			tagcrypt_libpath=/usr/lib \
+			tagcrypt_include=/usr/include/tagcrypt \
+			DESTDIR=debian/tbxsosd-kos  \
+			PREFIX=/usr \
+			CONFDIR=/etc/teambox/tbxsosd \
+			BINDIR=/usr/bin
+	rm -v debian/tbxsosd-kos/usr/bin/kctlbin
+
+# Copy the configuration file parts we need for the KOS.
+	cp config-stock/server.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/server.conf)'   >> $(config_file)
+	cp config-stock/client.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/client.conf)'   >> $(config_file)
+	cp config-stock/ssl.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/ssl.conf)'      >> $(config_file)
+	cp config-stock/log.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/log.conf)'      >> $(config_file)
+	cp config-stock/keysign.conf $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/keysign.conf)'  >> $(config_file)
+	cp config-stock/otut.conf    $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/otut.conf)'     >> $(config_file)
+	cp config-stock/pod.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/pod.conf)'      >> $(config_file)
+	cp config-stock/filter.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/filter.conf)'   >> $(config_file)
+	cp config-stock/ldap.conf    $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/ldap.conf)'     >> $(config_file)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/db.conf)' >> $(config_file)
+	echo 'include(web.conf)'      >> $(config_file)
+
+# Teambox Packaging Server build.
+build-tbxsos: build-tbxsos-stamp
+build-tbxsos-stamp: configure-stamp
+	dh_testdir
+	scons -c
+	scons build_type=tbxsos debug=0 db_debug=0
+
+	sed s/@PKG_NAME@/tbxsosd-tbxsos/ debian/default.preinst.in \
+		> debian/tbxsosd-tbxsos.preinst
+	sed s/@PKG_NAME@/tbxsosd-tbxsos/ debian/default.postrm.in \
+		> debian/tbxsosd-tbxsos.postrm
+
+	touch $@
+
+install-tbxsos: config_dir=$(CURDIR)/debian/tbxsosd-tbxsos/usr/share/teambox/tbxsosd/config-stock/
+install-tbxsos: config_file=$(config_dir)/tbxsosd.conf
+install-tbxsos: build-tbxsos
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs -ptbxsosd-tbxsos
+	scons install \
+			libktools_include=/usr/include/libktools \
+			libktools_libpath=/usr/lib \
+			tagcrypt_libpath=/usr/lib \
+			tagcrypt_include=/usr/include/tagcrypt \
+			DESTDIR=debian/tbxsosd-tbxsos  \
+			PREFIX=/usr \
+			CONFDIR=/etc/teambox/tbxsosd \
+			BINDIR=/usr/bin
+	install -m755 debian/healkeys debian/tbxsosd-tbxsos/usr/bin/tbxsosd-healkeys
+	rm -v debian/tbxsosd-tbxsos/usr/bin/kctlbin
+
+# Copy the configuration file parts we need for an KPS.
+	cp config-stock/server.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/server.conf)'   >> $(config_file)
+	cp config-stock/client.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/client.conf)'   >> $(config_file)
+	cp config-stock/ssl.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/ssl.conf)'      >> $(config_file)
+	cp config-stock/log.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/log.conf)'      >> $(config_file)
+	cp config-stock/filter.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/filter.conf)'   >> $(config_file)
+	cp config-stock/ldap.conf    $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/ldap.conf)'     >> $(config_file)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/db.conf)' >> $(config_file)
+	echo 'include(web.conf)'      >> $(config_file)
+
+# Encryption Key Server build.
+build-keyserver: build-keyserver-stamp
+build-keyserver-stamp: configure-stamp
+	dh_testdir
+	scons -c
+	scons build_type=keyserver debug=0 db_debug=0
+
+	sed s/@PKG_NAME@/tbxsosd-keyserver/ debian/default.preinst.in \
+		> debian/tbxsosd-keyserver.preinst
+	sed s/@PKG_NAME@/tbxsosd-keyserver/ debian/default.postrm.in \
+		> debian/tbxsosd-keyserver.postrm
+
+	touch $@
+
+install-keyserver: config_dir=$(CURDIR)/debian/tbxsosd-keyserver/usr/share/teambox/tbxsosd/config-stock/
+install-keyserver: config_file=$(config_dir)/tbxsosd.conf
+install-keyserver: build-keyserver
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs -ptbxsosd-keyserver
+	scons install \
+			libktools_libpath=/usr/lib \
+			libktools_include=/usr/include/libktools \
+			tagcrypt_libpath=/usr/lib \
+			tagcrypt_include=/usr/include/tagcrypt \
+			DESTDIR=debian/tbxsosd-keyserver \
+			PREFIX=/usr \
+			CONFDIR=/etc/teambox/tbxsosd \
+			BINDIR=/usr/bin
+	rm -v debian/tbxsosd-keyserver/usr/bin/kctlbin
+
+# Copy the configuration file parts we need for the KOS.
+	cp config-stock/server.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/server.conf)'   >> $(config_file)
+	cp config-stock/client.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/client.conf)'   >> $(config_file)
+	cp config-stock/ssl.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/ssl.conf)'      >> $(config_file)
+	cp config-stock/log.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/log.conf)'      >> $(config_file)
+	cp config-stock/keysign.conf $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/keysign.conf)'  >> $(config_file)
+	cp config-stock/otut.conf    $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/otut.conf)'     >> $(config_file)
+	cp config-stock/pod.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/pod.conf)'      >> $(config_file)
+	cp config-stock/filter.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/filter.conf)'   >> $(config_file)
+	cp config-stock/ldap.conf    $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/ldap.conf)'     >> $(config_file)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/db.conf)' >> $(config_file)
+	echo 'include(web.conf)'      >> $(config_file)
+
+# Full build.
+build-full-and-kctlbin: build-full-and-kctlbin-stamp
+build-full-and-kctlbin-stamp: configure-stamp
+	dh_testdir
+	scons -c
+	scons build_type=full debug=0 db_debug=0
+
+	sed s/@PKG_NAME@/tbxsosd-full/ debian/default.preinst.in \
+		> debian/tbxsosd-keyserver.preinst
+	sed s/@PKG_NAME@/tbxsosd-full/ debian/default.postrm.in \
+		> debian/tbxsosd-keyserver.postrm
+
+	touch $@
+
+install-full-and-kctlbin: config_dir=debian/tbxsosd-full/usr/share/teambox/tbxsosd/config-stock/
+install-full-and-kctlbin: config_file=$(config_dir)/tbxsosd.conf
+install-full-and-kctlbin: build-full-and-kctlbin
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs -ptbxsosd-full
+	mkdir -p debian/kctlbin/usr/bin
+	scons install \
+			libktools_libpath=/usr/lib \
+			libktools_include=/usr/include/libktools \
+			tagcrypt_libpath=/usr/lib \
+			tagcrypt_include=/usr/include/tagcrypt \
+			DESTDIR=debian/tbxsosd-full \
+			PREFIX=/usr \
+			CONFDIR=/etc/teambox/tbxsosd \
+			BINDIR=/usr/bin
+
+# Copy the configuration file parts we need for full online build.
+	cp config-stock/server.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/server.conf)'   >> $(config_file)
+	cp config-stock/client.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/client.conf)'   >> $(config_file)
+	cp config-stock/pod.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/pod.conf)'      >> $(config_file)
+	cp config-stock/ssl.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/ssl.conf)'      >> $(config_file)
+	cp config-stock/keysign.conf $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/keysign.conf)'  >> $(config_file)
+	cp config-stock/log.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/log.conf)'      >> $(config_file)
+	cp config-stock/otut.conf    $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/otut.conf)'     >> $(config_file)
+	cp config-stock/pod.conf     $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/pod.conf)'      >> $(config_file)
+	cp config-stock/filter.conf  $(config_dir)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/filter.conf)'   >> $(config_file)
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/db.conf)' >> $(config_file)
+	echo 'include(web.conf)'      >> $(config_file)
+
+# For tbxsosd-common
+	dh_installdirs -ptbxsosd-common
+# FIXME: Cheating a bit, install a default db.conf file too so that
+# kctl will work if there is a local database.  I think the Right Way
+# to install database configuration before installing tbxsosd would
+# be to query the user for database configuration data with debconf.
+# Since we only ever install machine that use local database, this is
+# largely irrelevant.
+	cp config-stock/db.conf \
+		debian/tbxsosd-common/usr/share/teambox/tbxsosd/config-stock/db.conf
+	echo 'include(/usr/share/teambox/tbxsosd/config-stock/db.conf)'\
+		>> debian/tbxsosd-common/usr/share/teambox/tbxsosd/config-stock/tbxsosd.conf
+	echo 'include(web.conf)'\
+		>> debian/tbxsosd-common/usr/share/teambox/tbxsosd/config-stock/tbxsosd.conf
+
+# For kctl.
+	dh_installdirs -pkctlbin
+	mv debian/tbxsosd-full/usr/bin/kctlbin debian/kctlbin/usr/bin
+
+binary-pod-tools:
+	dh_testdir
+	dh_testroot -ptbxsosd-pod-tools
+	dh_install -ptbxsosd-pod-tools
+	dh_installdocs -ptbxsosd-pod-tools
+	dh_compress -ptbxsosd-pod-tools
+	dh_fixperms -ptbxsosd-pod-tools
+	dh_installdeb -ptbxsosd-pod-tools
+	dh_gencontrol -ptbxsosd-pod-tools
+	dh_md5sums -ptbxsosd-pod-tools
+	dh_builddeb -ptbxsosd-pod-tools
+
+binary-full: install-full-and-kctlbin
+	dh_testdir
+	dh_testroot -ptbxsosd-full
+	dh_installdocs -ptbxsosd-full
+	dh_installinit --name=tbxsosd -ptbxsosd-full
+	dh_installcron -ptbxsosd-full
+	dh_compress -ptbxsosd-full
+	dh_fixperms -ptbxsosd-full
+	dh_installdeb -ptbxsosd-full
+	dh_shlibdeps -ptbxsosd-full
+	dh_gencontrol -ptbxsosd-full
+	dh_md5sums -ptbxsosd-full
+	dh_builddeb -ptbxsosd-full
+
+binary-kos: install-kos
+	dh_testdir
+	dh_testroot -ptbxsosd-kos
+	dh_installdocs -ptbxsosd-kos
+	dh_installinit --name=tbxsosd -ptbxsosd-kos
+	dh_installcron -ptbxsosd-kos
+	dh_compress -ptbxsosd-kos
+	dh_fixperms -ptbxsosd-kos
+	dh_installdeb -ptbxsosd-kos
+	dh_shlibdeps -ptbxsosd-kos
+	dh_gencontrol -ptbxsosd-kos
+	dh_md5sums -ptbxsosd-kos
+	dh_builddeb -ptbxsosd-kos
+
+binary-keyserver: install-keyserver
+	dh_testdir
+	dh_testroot -ptbxsosd-keyserver
+	dh_installdocs -ptbxsosd-keyserver
+	dh_installinit --name=tbxsosd -ptbxsosd-keyserver
+	dh_installcron -ptbxsosd-keyserver
+	dh_link -ptbxsosd-keyserver
+	dh_compress -ptbxsosd-keyserver
+	dh_fixperms -ptbxsosd-keyserver
+	dh_installdeb -ptbxsosd-keyserver
+	dh_shlibdeps -ptbxsosd-keyserver
+	dh_gencontrol -ptbxsosd-keyserver
+	dh_md5sums -ptbxsosd-keyserver
+	dh_builddeb -ptbxsosd-keyserver
+
+binary-tbxsos: install-tbxsos
+	dh_testdir
+	dh_testroot -ptbxsosd-tbxsos
+	dh_installdocs -ptbxsosd-tbxsos
+	dh_installinit --name=tbxsosd -ptbxsosd-tbxsos --noscripts
+	dh_installcron -ptbxsosd-tbxsos
+	dh_compress -ptbxsosd-tbxsos
+	dh_fixperms -ptbxsosd-tbxsos
+	dh_installdeb -ptbxsosd-tbxsos
+	dh_shlibdeps -ptbxsosd-tbxsos
+	dh_gencontrol -ptbxsosd-tbxsos
+	dh_md5sums -ptbxsosd-tbxsos
+	dh_builddeb -ptbxsosd-tbxsos
+
+binary-kctlbin: install-full-and-kctlbin
+	dh_testdir
+	dh_testroot -pkctlbin
+	dh_installdocs -pkctlbin
+	dh_compress -pkctlbin
+	dh_fixperms -pkctlbin
+	dh_installdeb -pkctlbin
+	dh_shlibdeps -pkctlbin
+	dh_gencontrol -pkctlbin
+	dh_md5sums -pkctlbin
+	dh_builddeb -pkctlbin
+
+binary-common: install-full-and-kctlbin
+# FIXME: Move this somewhere else.
+	mkdir -p debian/tbxsosd-common/etc/teambox/tbxsosd/ssl
+	mkdir -p debian/tbxsosd-common/etc/logrotate.d
+
+	dh_installdirs -ptbxsosd-common
+
+	install -m644 debian/kps-base.req \
+		debian/tbxsosd-common/usr/share/teambox/tbxsosd/ssl
+	install -T -m644 debian/tbxsosd.logrotate \
+		debian/tbxsosd-common/etc/logrotate.d/tbxsosd
+
+# Make an empty logrotate configuration.
+	echo "# Superseded by /etc/logrotate.d/tbxsosd" \
+		>> debian/tbxsosd-common/etc/logrotate.d/teambox
+
+	dh_testdir
+	dh_testroot -ptbxsosd-common
+	dh_installdocs -ptbxsosd-common
+	dh_install -ptbxsosd-common
+	dh_installdirs -ptbxsosd-common
+	dh_compress -ptbxsosd-common
+	dh_fixperms -ptbxsosd-common
+	dh_installdeb -ptbxsosd-common
+# Get the dependencies for the full tbxsosd daemon.  Maybe this is
+# cheating.
+	dh_shlibdeps -ptbxsosd-full
+	dh_gencontrol -ptbxsosd-common -- -Tdebian/tbxsosd-full.substvars
+	dh_md5sums -ptbxsosd-common 
+	dh_builddeb -ptbxsosd-common
+
+binary-indep: 
+# FIXME: As it is now, binary-full must be build immediately before
+binary-arch: binary-kos binary-keyserver binary-tbxsos binary-pod-tools \
+	     binary-full binary-kctlbin binary-common
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary configure
+.PHONY: binary-tbxsos binary-iks binary-eks binary-kpg binary-full
+.PHONY: install-tbxsos install-iks install-eks install-kpg install-full

@@ -1,0 +1,2 @@
+pod/formatmail usr/bin/
+pod/*.tmpl     usr/share/teambox/templates/

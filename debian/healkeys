@@ -1,0 +1,79 @@
+#
+# Copyright (C) 2006-2012 Opersys inc.
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License, not any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#!/bin/bash
+# 
+# Heal sick keys in the database.  This is to change the internal key
+# ID of keys in the database to the number they are known by in the
+# database.  Sick keys happened following one manual upgrade and
+# caused tbxsosd to crash.
+# 
+# This will be a no-op for the rest of the installed KPS.
+#
+# This was just lightly tested, but should work well enough with a
+# working KCTL.
+
+# This won't work without kctl.
+[ -z "$(which kctl)" ] && exit 1
+
+keys=$(kctl lskeys | grep -v key_id | awk '{print $2}' | uniq )
+
+# Loop for each full keyset found in the database.
+for k in $keys; do
+    # Possibly incorrect keys from the DB
+    keys_in_dir=$(mktemp -d)
+    # Corrected key ID.
+    keys_id_dir=$(mktemp -d)
+    # Fixed key owner.
+    keys_nm_dir=$(mktemp -d)
+
+    # Output the key in a temporary directory.
+    kctl exportkeys $k $keys_in_dir/key 2> /dev/null
+    owner=$(kctl lskeys | grep -v key_id | grep $k | head -1 | cut -d $'\t' -f 3)
+
+    # No-op if there are no keys that were exported.
+    if [ ! -z "$(ls $keys_in_dir/* 2> /dev/null)" ]; then
+        for kf in $keys_in_dir/*; do
+            kf_name=$(basename $kf)
+            ko=$keys_id_dir/$kf_name
+
+            # Change the ID of the key in the data file.
+            kctl keysetid $kf $k $ko
+        done
+
+        if [ ! -z "$owner" ]; then
+            for kf in $keys_id_dir/*; do
+                kf_name=$(basename $kf)
+                ko=$keys_nm_dir/$kf_name
+
+            # Change the key name.
+                kctl keysetname $kf "${owner}" $ko
+            done
+        fi
+
+        # Re-import the keys.  They should replace the other keys.
+        for ko in $keys_nm_dir/*; do
+            kctl importkey $ko
+        done
+    fi
+
+    rm -rf $keys_in_dir
+    rm -rf $keys_id_dir
+    rm -rf $keys_nm_dir
+done
+
+exit 0

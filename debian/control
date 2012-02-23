@@ -1,0 +1,55 @@
+Source: tbxsosd
+Section: teambox
+Priority: optional
+Maintainer:
+Build-Depends: debhelper (>= 4), build-essential, libpq-dev, libapr1-dev, libktools0-dev (>= 1.2.99), libtagcrypt1-dev (>= 1.3.2), libgcrypt11-dev, flex, libsasl2-dev, gcc, pkg-config, scons, libreadline5-dev, libadns1-dev, libldap-dev, debconf (> 1.0) | debconf-2.0, libpam0g-dev
+Standards-Version: 3.7.2
+
+Package: tbxsosd-common
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, openssl (>= 0.9.7), postgresql-client (>= 8.2), libsasl2-modules
+Description: Dependency package for KPS.
+  Install the dependencies that will be required for the KPS.
+
+Package: kctlbin
+Architecture: any
+Conflicts: kctl (<< 1.2.99)
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Teambox Sign-On Server Controller
+  Basic utility to manage tbxsosd database.
+
+Package: tbxsosd-tbxsos
+Architecture: any
+Conflicts: teambox-kps
+Replaces: teambox-kps
+Provides: teambox-kps
+Depends: tbxsosd-common (>= 1.4), tbxsosd-db, ${shlibs:Depends}, ${misc:Depends}, libsasl2-modules, kctl (>= 1.4)
+Description: Teambox Daemon for TBXSOS
+ Teambox Daemon configured for use TeamBox Sign-On Server.
+
+Package: tbxsosd-full
+Architecture: any
+Depends: tbxsosd-common (>= 1.4), tbxsosd-db, kctl (>= 1.4), ${shlibs:Depends}, ${misc:Depends}, tbxsosd-pod-tools
+Conflicts: tbxsosd-kps, tbxsosd-kos, tbxsosd-keyserver
+Description: Full Teambox Sign-On Server
+ Full request support for Tbxsosd.
+
+Package: tbxsosd-keyserver
+Architecture: any
+Depends: tbxsosd-common (>= 1.4), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: tbxsosd-kps, tbxsosd-kos, tbxsosd-full
+Description: Teambox Identity Key Daemon
+ Teambox Identity Key server for online services.
+
+Package: tbxsosd-kos
+Architecture: any
+Depends: tbxsosd-common (>= 1.4), ${shlibs:Depends}, ${misc:Depends}, tbxsosd-pod-tools
+Conflicts: tbxsosd-kps, tbxsosd-full, tbxsosd-kos
+Description: Tbxsosd online service
+ Online service client for tbxsosd.
+
+Package: tbxsosd-pod-tools
+Architecture: any
+Depends: tbxsosd-common (>= 1.4), libtemplate-perl, tbxsosd-pod-tools
+Description: tbxsosd POD tools
+ Stuff required by tbxsosd to be able to send PoD mails.

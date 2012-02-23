@@ -1,0 +1,53 @@
+#
+# Copyright (C) 2006-2012 Opersys inc.
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License, not any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#!/bin/sh
+# postrm script for tbxsosd* packages
+
+set -e
+
+PKG=@PKG_NAME@
+DIR=/usr/share/teambox/tbxsosd/config-stock
+
+remove_divert() {
+    dpkg-divert \
+        --quiet \
+        --package $PKG \
+        --remove \
+        --rename \
+        --divert $DIR/tbxsosd.conf.common $DIR/tbxsosd.conf
+}
+
+# 
+# This is based on code found in the Debian Policy Manual, section G.
+#
+if [ remove = "$1" -o abort-install = "$1" -o disappear = "$1" ]; then
+    remove_divert
+fi
+if [ abort-upgrade = "$1" ] && dpkg --compare-versions "$2" lt 1.4; then
+    remove_divert
+fi    
+
+if [ purge = "$1" ]; then
+    if [ -d /var/cache/teambox ]; then
+        rm -rf /var/cache/teambox
+    fi
+fi
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,36 @@
+#
+# Copyright (C) 2006-2012 Opersys inc.
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License, not any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+Import('env')
+
+libutils_FILES = ['conf.l',
+                  'logging.c',
+                  'process.c',
+                  'utils.c',
+                  'str.c',
+                  'sendmail.c',
+                  'template.c',
+                  'options.c',
+                  'mime.c']
+
+# Build the library.
+cpp_path = env['CPPPATH'] + ['#libutils', '#common', '#libcomm']
+libutils = env.StaticLibrary('tbxsosd_utils',
+                             libutils_FILES,
+                             CPPPATH = cpp_path)
+
+Return('libutils')

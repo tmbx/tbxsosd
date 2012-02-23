@@ -1,0 +1,6 @@
+var/cache/teambox
+usr/bin
+etc/teambox/tbxsosd
+etc/teambox/tbxsosd/ssl
+usr/share/teambox/tbxsosd/config-stock
+usr/share/teambox/tbxsosd/ssl

@@ -1,0 +1,175 @@
+#
+# Copyright (C) 2006-2012 Opersys inc.
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; version 2
+# of the License, not any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#!/bin/sh
+# postinst script for tbxsosd packages.
+
+set -e
+
+CONFIGS="server.conf client.conf pod.conf ssl.conf db.conf keysign.conf log.conf otut.conf pod.conf filter.conf web.conf ldap.conf"
+
+# This is some little magic ripped off from the debian wiki:
+# http://wiki.debian.org/DpkgConffileHandling
+has_conffile_changed() {
+    local conffile=$1 md5sum old_md5sum
+    [ ! -e $conffile ] && echo "Conffile %s does not exists." && exit 1
+    md5sum=`md5sum $conffile | sed -e 's/ .*//'`
+    old_md5sum=`dpkg-query -W -f='${Conffiles}' $PKGNAME | sed -n -e "\\\\ $conffile {s/ obsolete$//;s/.* //p}"`
+    if [ "$md5sum" != "$old_md5sum" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Code to move the configuration files from /etc/teambox, to /
+move_config_14() {
+    local CF
+
+    for cfg in $CONFIGS; do
+        CF=/etc/teambox/$cfg
+        if [ -e $CF ]; then
+            # grep will fail if there is no data matched.
+            set +e
+            lines=`grep -Ev "^.*#|^$" $CF 2>/dev/null`
+            set -e
+
+            # If the file was changed by the user and it is non-empty,
+            # add its content to the end of web.conf.
+            if has_conffile_changed $CF && [ ! -z "$lines" ]; then
+                echo "Adding changed $CF to web.conf."
+                echo $lines >> /etc/teambox/tbxsosd/web.conf
+            fi
+
+            echo "Removing unchanged $CF as it is now handled elsewhere."
+            rm $CF
+        fi
+    done
+}
+
+convert_interfaces() {
+    if [ -e /etc/teambox/tbxsosd/web.conf ]; then
+        if grep -q server.address /etc/teambox/tbxsosd/web.conf; then
+            # Get the currently defined listen interface and port.
+            ssl_iface=$(cat /etc/teambox/tbxsosd/web.conf \
+                | perl -ne '/server.address.*"(.*)"/ and map({ print; print "\n" } (split / /, $1))')
+            port=$(cat /etc/teambox/tbxsosd/web.conf \
+                | perl -ne '/server.port.*"(.*)"/ and print $1."\n";')
+
+            # Bail out if there are no interface configured, the
+            # configured default will do.
+            [ -z $ssl_iface ] && return 0
+
+            # Fallback to the default port if there isn't any defined
+            # in the file.
+            [ -z $port ] && port=443
+
+            # Build up a valid interface string in the new format.é
+            ssl_listen_on=
+            for i in $ssl_iface; do
+                ssl_listen_on="$ssl_listen_on$i:$port "
+            done
+            ssl_listen_on=$(echo $ssl_listen_on)
+
+            # Replace the interface definition by the old values and erase
+            # the port configuration.
+            cat /etc/teambox/tbxsosd/web.conf \
+                | sed "s/server.address.*/server.ssl_listen_on = \"$ssl_listen_on\";/" \
+                | sed "s/server.port.*//" \
+                > /etc/teambox/tbxsosd/web.conf.tmp
+            mv /etc/teambox/tbxsosd/web.conf.tmp /etc/teambox/tbxsosd/web.conf
+        fi
+    fi
+}
+
+case "$1" in
+    configure)
+        if [ ! -z "$2" ]; then
+            # Move configuration files for tbxsosd from /etc/teambox to
+            # /etc/teambox/tbxsosd
+            if dpkg --compare-versions "$2" lt 1.4; then
+                move_config_14
+
+                # We don't handle tbxsosd.conf has it should *not* have
+                # changed.
+                F=/etc/teambox/tbxsosd.conf
+                if [ -e $F ] && has_conffile_changed $F; then
+                    mv $F /etc/teambox/tbxsosd.conf.bak
+                elif [ -e $F ]; then
+                    rm $F
+                fi
+            fi
+
+            if dpkg --compare-versions "$2" lt 10; then
+                convert_interfaces
+            fi
+        fi
+
+        # Create web.conf if it doesn't exists.
+        touch /etc/teambox/tbxsosd/web.conf
+
+        # Give teambox group read-write access to web.conf.
+        chgrp teambox /etc/teambox/tbxsosd/web.conf
+        chmod g+rw /etc/teambox/tbxsosd/web.conf
+
+        # Give teambox group read-write access to some teambox activation directories.
+        mkdir -p /etc/teambox/act/
+        chmod 770 /etc/teambox/act/
+        chgrp teambox /etc/teambox/act/
+        mkdir -p /etc/teambox/act/archive_bundle
+        chmod 770 /etc/teambox/act/archive_bundle
+        chgrp teambox /etc/teambox/act/archive_bundle
+        mkdir -p /etc/teambox/act/activation
+        chmod 770 /etc/teambox/act/activation
+        chgrp teambox /etc/teambox/act/activation
+
+        # Recreate the tbxsosd.conf link in /etc.
+        ln -fs /usr/share/teambox/tbxsosd/config-stock/tbxsosd.conf \
+            /etc/teambox/tbxsosd/tbxsosd.conf
+
+        # Make sure we will have access to the data file.
+        if [ ! -d /var/cache/teambox ]; then
+            mkdir /var/cache/teambox
+        fi
+        chown tbxsosd.tbxsosd /var/cache/teambox
+
+        # Correctly set the access rights if the data file exists.
+        if [ -f /var/cache/teambox/tbxsosd.data ]; then
+            chown tbxsosd.tbxsosd /var/cache/teambox/tbxsosd.data
+        fi
+
+        # Heal sick keys.
+        if [ -e /usr/bin/tbxsosd-healkeys ]; then
+            /usr/bin/tbxsosd-healkeys >/dev/null
+        fi
+        
+        # Activate tbxsosd.
+        touch /etc/teambox/tbxsosd/activated
+        ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,74 @@
+/**
+ * tbxsosd/common/config.h.in
+ * Copyright (C) 2006-2012 Opersys inc.
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; version 2
+ * of the License, not any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
+#define CONFIG_PATH "%(config_path)s"
+
+#ifndef INFO_REVISION
+#define INFO_REVISION "$Revision: $"
+#endif
+
+/* Full build. */
+#if %(build_conf)d == 0 
+#define REQUEST_GUEST_DECRYPT
+#define REQUEST_KEY_DECRYPT
+#define REQUEST_GETENC
+#define REQUEST_GETSIG
+#define REQUEST_PACKAGE
+#define REQUEST_USER_INFO
+#define REQUEST_LOGIN
+#define REQUEST_TICKET
+#define REQUEST_OTUT
+#define REQUEST_OTUT_LOGIN
+#endif
+
+/* KOS build. */
+#if %(build_conf)d == 7
+#define REQUEST_GUEST_DECRYPT
+#define REQUEST_GETENC
+#define REQUEST_GETSIG
+#define REQUEST_PACKAGE
+#define REQUEST_OTUT
+#define REQUEST_OTUT_LOGIN
+#endif
+
+/* Full KPS build. */
+#if %(build_conf)d == 2
+#define REQUEST_KEY_DECRYPT
+#define REQUEST_GETENC
+#define REQUEST_PACKAGE
+#define REQUEST_USER_INFO
+#define REQUEST_LOGIN
+#define REQUEST_TICKET
+#endif
+
+/* EKS build. */
+#if %(build_conf)d == 4
+#define REQUEST_GETENC
+#endif
+
+/* IKS build. */
+#if %(build_conf)d == 5
+#define REQUEST_GETSIG
+#endif
+
+/* Keyserver build. */
+#if %(build_conf)d == 8
+#define REQUEST_GETENC
+#define REQUEST_GETSIG
+#endif

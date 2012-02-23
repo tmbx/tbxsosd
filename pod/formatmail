@@ -1,0 +1,95 @@
+#!/usr/bin/perl -W
+#
+# Chopped-up version of pkgmail that only concerns itself with
+# formatting the packaged mail.  Mailing features and KPS mail
+# packaging feature are removed.
+
+use strict;
+use Template;
+use Data::Dumper;
+use POSIX qw(getcwd);
+
+my %config;
+my $msg;
+
+# Read the configuration on the command line.
+sub read_args {
+  my ($k, $v);
+
+  while ($k = shift @ARGV) {
+    $v = shift @ARGV;
+    die 'no value for key' . $k . "\n" unless defined($v);
+    $config{$k} = $v;
+  }
+}
+
+# Read the username and passwords on standard input.
+sub read_stdin {
+  my @a;
+  my ($k, $v);
+
+  while (<STDIN>) {
+    @a = split;
+
+    return if ($a[0] eq 'end');
+
+    $k = shift @a;
+    if (length(@a) > 0) {
+      $config{$k} = (join ' ', @a);
+    } else {
+      $config{$k} = '';
+    }
+  }
+}
+
+sub read_body {
+  $config{message} = '';
+  while (<STDIN>) {
+    $config{message} .= $_;
+  }
+}
+
+sub check_args {
+  foreach my $e ('ip', 'pod_date',
+                 'orig_from_addr', 'orig_subject', 'orig_serial_number',
+                 'orig_subject_state', 'orig_packaging_type') {
+    die "missing $e" unless defined($config{$e});
+  }
+}
+
+sub make_message {
+  my $template_config = { INCLUDE_PATH => ['/usr/share/teambox/templates',
+                                           '/home/fdgonthier/repos/tbxsosd-IPOD/pod',
+                                           POSIX::getcwd()],
+                          RELATIVE => 1,
+                          INTERPOLATE => 1,
+                          TRIM => 1 };
+  my $template = Template->new($template_config);
+  my %f = %config;
+  my $out;
+  if (!$template->process($config{template}, \%f, \$out)) {
+    my $error = $template->error();
+    print STDERR "error type: ", $error->type(), "\n";
+    print STDERR "error info: ", $error->info(), "\n";
+    print STDERR $error, "\n";
+  } else {
+    $config{message} = $out . "\n";
+  }
+}
+
+read_args;
+read_stdin;
+read_body;
+make_message;
+
+# wierd but: if message empty, $config{message} doesn't get set even
+# though $msg was defined in sign_message
+
+if (!defined($config{message})) {
+  die "Got no message back.\n";
+}
+
+print $config{message};
+
+
+exit 0;

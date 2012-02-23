@@ -1,0 +1,22 @@
+## DATABASES
+
+db.name = "";
+db.username = "";
+db.password = "";
+db.admin_username = "";
+db.admin_password = "";
+db.host = "";
+db.port = "";
+db.timeout = "";
+
+# FIXME: This option has been put here because there is currently no
+# single configuration file for kctl.
+
+# Set this to 1 if you want kctl to login using the current user
+# credentials.  This is necessary on KPSes because kctl has to be used
+# non-interactively in some places and because the default PostgreSQL
+# authentication configuration validates that the username used to
+# connect to the database is the same as the one the connection
+# process is running under.
+# In short, set this to 0 only if you know what you are doing.
+kctl.curr_creds = "1";

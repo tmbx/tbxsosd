@@ -1,0 +1,10 @@
+from_name Mister Source
+from_addr source@source.com
+to target@target.com
+cc 
+subject This is an encrypted mail
+username source
+password source
+pod_addr source@source.com
+template pod_fr.tmpl
+end
