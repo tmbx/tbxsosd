@@ -340,7 +340,7 @@ static int kddblogin_set_results(apr_pool_t *pool, PGresult *db_res, struct kd_l
            conclusively find the profile ID in that place. */
         if (!PQgetisnull(db_res, 0, 1)) {
             s = PQgetvalue(db_res, 0, 1);
-            if (sscanf(s, "%llu", &(*res)->prof_id) < 1) {
+            if (sscanf(s, "%lu", &(*res)->prof_id) < 1) {
                 KERROR_SET(_db_, 0, "incorrect value for profile ID: %s", s);
                 return -1;
             }

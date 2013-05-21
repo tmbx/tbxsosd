@@ -179,7 +179,7 @@ static int kdsh_ready_file() {
     const char *data_file;
     apr_finfo_t fs;
     apr_status_t n;
-    uint32_t s = sizeof(struct shared_data);
+    apr_size_t s = sizeof(struct shared_data);
 
     memset(&shdata, 0, sizeof(struct shared_data));
 

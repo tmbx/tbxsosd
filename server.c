@@ -89,7 +89,7 @@ void kdserver_sig_handler(kdserver *self, int sig_id) {
 }
 
 static int kdserver_child_kill(struct kdchild_data *cd, void *data) {
-    data = NULL;
+    data = data;
 
     /* Send a CHILD_DONE message down the pipe before quitting.  This
        is sent in fire-and-forget mode in hope the child will receive
@@ -433,7 +433,7 @@ static int kdserver_set_gid(kdserver *self) {
  * due to a signal.
  */
 static apr_status_t kdserver_delete(void *data) {
-    data = NULL;
+    data = data;
    
     /*
      * Clean SSL stuff.  The SSL documentation doesn't make it clear
@@ -833,14 +833,12 @@ int kdserver_main(kdserver *self, apr_pool_t *parent_pool) {
     
     /* Accept connections */
     while (1) {
-        int err = 0, child_cnt;
+        int err = 0;
         kdcomm_pollset *pset;
         struct child_pollset_args args;
         struct kdcomm_pollset_event *pfd;
         
         apr_pool_clear(loop_pool);
-
-        child_cnt = apr_hash_count(self->child_set->childs);
 
         pset = kdcomm_pollset_new(loop_pool, 20);
         kdcomm_pollset_set_timeout(pset, -1);

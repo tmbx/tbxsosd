@@ -105,7 +105,7 @@ static kdsql *kddb_connect_db(apr_pool_t *pool, enum kddb_auth_mode auth_mode) {
         break;
     }
 
-    conn->db_name = "teamboxd_db";
+    conn->db_name = "tbxsosd_db";
     conn->db_port = options_get_uint16("db.port");
     conn->db_timeout = options_get_uint32("db.timeout");
     
@@ -680,7 +680,7 @@ int kddb_event(apr_pool_t *pool,
 		vars[i][1] = apr_psprintf(ev_pool, "%u", (uint32_t)event_vars[i].val.uint32);
 		break;
 	    case EV_VAR_UINT64:
-		vars[i][1] = apr_psprintf(ev_pool, "%llu", (uint64_t)event_vars[i].val.uint64);
+		vars[i][1] = apr_psprintf(ev_pool, "%lu", (uint64_t)event_vars[i].val.uint64);
 		break;
 	    }
 	}
@@ -814,8 +814,8 @@ int kddb_search_enc_pkey(apr_pool_t *key_pool,
         }
     
         /* Fetch the key we found above. */
-        if (kddbpkey_get(db->pkey_db, key_pool, PKEY_ENCRYPTION, key_id, ki) < 0) {
-            KERROR_PUSH(_db_, 0, "Cannot get key for key id %llu.", key_id);        
+        if (kddbpkey_get(db->pkey_db, key_pool, PKEY_ENCRYPTION, key_id, ki) <= 0) {
+            KERROR_PUSH(_db_, 0, "Cannot get key for key id %lu.", key_id);        
             r = -1;
             break;
         }

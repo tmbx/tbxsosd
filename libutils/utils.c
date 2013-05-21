@@ -44,7 +44,6 @@ int set_gid_name(apr_pool_t *pool, const char *group) {
     char *buf;
     struct group grp, *g2;
     long s;
-    int n;
 
     apr_pool_create(&subpool, pool);
 
@@ -55,13 +54,11 @@ int set_gid_name(apr_pool_t *pool, const char *group) {
         getgrnam_r(group, &grp, buf, s, &g2);
 
         if (g2 == NULL) {
-            n = errno;
             KERROR_SET(_server_, 0, "Group %s not found.", group);
             break;
         }
         
         if (setegid(grp.gr_gid)) {
-            n = errno;
             KERROR_SET(_server_, 0, "Cannot change process group name to %s.", group);
             break;
         }

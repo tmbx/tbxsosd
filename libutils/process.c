@@ -51,7 +51,7 @@ static void process_signal_block(int *signal, int is_blocked) {
 int process_start(apr_pool_t *pool, struct process_args *args, struct process **proc) {
     const int RD = 0, WR = 1;
     int pipe_in[2], pipe_out[2], pipe_err[2];
-    char **cmdline, *prog;
+    char **cmdline;
     size_t i;
     struct sigaction sa;
 
@@ -66,7 +66,6 @@ int process_start(apr_pool_t *pool, struct process_args *args, struct process **
     }
 
     cmdline[i] = NULL;
-    prog = cmdline[0];
 
     if (pipe(pipe_in) < 0 ||
         pipe(pipe_out) < 0 ||
@@ -263,11 +262,10 @@ static int process_wait_end(struct process *proc) {
     sigaddset(&wanted_sigset, SIGCHLD);
 
     while (1) {
-        int n, e, is_our_child, is_exited;
+        int n, is_our_child, is_exited;
 
         DEBUG(_log_misc_, "Waiting for PID %d end.", proc->pid);        
         n = sigtimedwait(&wanted_sigset, &si, (const struct timespec *)&ts);
-        e = errno;
 
         DEBUG(_log_misc_, "sigtimedwait returns %d.", n);
             

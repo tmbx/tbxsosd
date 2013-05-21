@@ -53,8 +53,8 @@
 
 static int pkg_write_stats(apr_pool_t *pool, struct kdpacket *in_pkt, struct kdpacket *out_pkt) {
     uint32_t i, attch_total_size = 0;
-    uint32_t nb_attach = 0, nb_pwd = 0, nb_recip = 0, pkg_type = 0, pkg_out_s = 0;
-    size_t body_html_s = 0, body_text_s = 0;
+    uint32_t nb_attach = 0, nb_pwd = 0, nb_recip = 0, pkg_type = 0;
+    size_t body_html_s = 0, body_text_s = 0, pkg_out_s = 0;
     struct proto_attachment *pa;
 
     assert(kdpacket_is_present(in_pkt, EL_PKG_TYPE));

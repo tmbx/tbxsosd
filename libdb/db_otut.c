@@ -144,7 +144,7 @@ int kddbotut_login(kddbotut *self,
         /* Check the returned valude. */
         if (strcmp(PQgetvalue(db_res, 0, 0), "0") != 0) {
             key_id_text = PQgetvalue(db_res, 0, 0);
-            if (sscanf(key_id_text, "%llu", key_id) < 1) {
+            if (sscanf(key_id_text, "%lu", key_id) < 1) {
                 KERROR_SET(_db_, 0, "incorrect data for key ID: %s", key_id_text);
                 break;
             }

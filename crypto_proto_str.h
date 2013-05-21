@@ -38,7 +38,7 @@
     "----- KRYPTIVA SIGNED MESSAGE -----\n"                             
     
 #define KRYPTIVA_INFO_EN                                                \
-    "This email packaged using Kryptiva protocol, the"                  \  
+    "This email packaged using Kryptiva protocol, the"                  \
     "security system underneath the Teambox(R) suite.\n"                \
     "For more information, visit: http://www.teambox.co\n"
 

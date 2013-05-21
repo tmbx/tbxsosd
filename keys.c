@@ -779,7 +779,7 @@ static int kdkey_read_key_file(apr_pool_t *pool, apr_file_t *f, struct kdkey_inf
         }
 
         /* Check the key number. */
-        if (sscanf(key_id_str, "%llu", &ki->key_id) < 1) {
+        if (sscanf(key_id_str, "%lu", &ki->key_id) < 1) {
             KERROR_SET(_kctl_, 1, "Invalid number: %s\n", key_id_str);
             break;
         }
@@ -911,7 +911,7 @@ int kdkey_write_key(apr_pool_t *parent_pool, const char *key_file, struct kdkey_
         s = apr_file_puts(key_start, f);
         if (s != APR_SUCCESS) goto write_error;
         
-        str = apr_psprintf(pool, "%llu\n", ki->key_id);
+        str = apr_psprintf(pool, "%lu\n", ki->key_id);
         s = apr_file_puts(str, f);
         if (s != APR_SUCCESS) goto write_error;
 

@@ -47,7 +47,7 @@ enum client_state kdclient_get_kws_ticket_request(kdclient *self,
     int empty_ticket = 0;
     enum client_state next_state = CSTATE_DROP_ACK;
     
-    in_pkt = NULL;
+    in_pkt = in_pkt;
 
     /* Check if the user can do an application packet. */
     if ((self->user->caps & CAN_APPS) == 0) {

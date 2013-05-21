@@ -154,7 +154,7 @@ void template_set_uint32(struct template *self, const char *key, uint32_t v) {
 void template_set_uint64(struct template *self, const char *key, uint64_t v) {
     char *sv;
 
-    sv = apr_psprintf(self->pool, "%llu", v);
+    sv = apr_psprintf(self->pool, "%lu", v);
     apr_hash_set(self->vars, key, APR_HASH_KEY_STRING, sv);
 }
 

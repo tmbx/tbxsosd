@@ -83,7 +83,7 @@ char *kdsql_uint64_param(int n, uint64_t val) {
     assert(n < 9);
 
     /* Prepare the parameter */
-    sprintf(params[n], "%llu", val);
+    sprintf(params[n], "%lu", val);
     return params[n];
 }
 
