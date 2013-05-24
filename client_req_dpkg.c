@@ -460,7 +460,7 @@ enum client_state kdclient_request_pod_dpkg(kdclient *self,
     do {
         /* Fetch the sender signature key. */
         if (kdkey_get_sig_skey(pool, dpkg->sign->keyid, &ki) <= 0) {
-            kdclient_error("Failed to fetch secret signature key %llu.");
+            kdclient_error("Failed to fetch secret signature key "PRINTF_64"u.");
             break;
         }
 

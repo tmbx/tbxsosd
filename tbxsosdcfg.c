@@ -82,7 +82,7 @@ int dump_single_option(const char *opt_arg) {
     if (f & OPT_UINT32)
         fprintf(stdout, "%u\n", options_get_uint32(opt_arg));
     else if (f & OPT_UINT64)
-        fprintf(stdout, "%llu\n", options_get_uint64(opt_arg));
+        fprintf(stdout, PRINTF_64"u\n", options_get_uint64(opt_arg));
     else if (f & OPT_STRING)
         fprintf(stdout, "%s\n", options_get_str(opt_arg));
     else if (f & OPT_BOOL)

@@ -243,7 +243,7 @@ int kdkey_get_key(apr_pool_t *pool,
         err = kddb_fetch_key(pool, key_id, ktype, ki);
         /* Key fetch error. */
         if (err < 0) {
-            KERROR_PUSH(_keys_, 0, "failed to fetch key %llu", key_id);
+            KERROR_PUSH(_keys_, 0, "failed to fetch key "PRINTF_64"u", key_id);
             err = -1;
             break;
         }
@@ -269,7 +269,7 @@ int kdkey_get_key(apr_pool_t *pool,
             /* Check for inconsistent key ID. */
             if (((tagcrypt_skey *)(*ki)->key)->keyid != (*ki)->key_id) {
                 KERROR_SET(_keys_, 0, 
-                           "ill-formed key, internal key ID: %llu, external key ID: %llu", 
+                           "ill-formed key, internal key ID: "PRINTF_64"u, external key ID: "PRINTF_64"u", 
                            ((tagcrypt_skey *)(*ki)->key)->keyid, (*ki)->key_id);
                 err = -1;
                 break;
@@ -291,7 +291,7 @@ int kdkey_get_key(apr_pool_t *pool,
             /* Check for inconsistent key ID. */
             if (((tagcrypt_pkey *)(*ki)->key)->keyid != (*ki)->key_id) {
                 KERROR_SET(_keys_, 0, 
-                           "ill-formed key, internal key ID: %llu, external key ID: %llu", 
+                           "ill-formed key, internal key ID: "PRINTF_64"u, external key ID: "PRINTF_64"u", 
                            ((tagcrypt_pkey *)(*ki)->key)->keyid, (*ki)->key_id);
                 err = -1;
                 break;
@@ -304,7 +304,7 @@ int kdkey_get_key(apr_pool_t *pool,
 
         if ((*ki)->key == NULL) {
             err = -1;
-            KERROR_SET(_keys_, 0, "failed to create key %llu", key_id);
+            KERROR_SET(_keys_, 0, "failed to create key "PRINTF_64"u", key_id);
         }
 
         kbuffer_clean(&buf);
@@ -777,7 +777,7 @@ static int kdkey_read_key_file(apr_pool_t *pool, apr_file_t *f, struct kdkey_inf
         }
 
         /* Check the key number. */
-        if (sscanf(key_id_str, "%lu", &ki->key_id) < 1) {
+        if (sscanf(key_id_str, PRINTF_64"u", &ki->key_id) < 1) {
             KERROR_SET(_kctl_, 1, "Invalid number: %s\n", key_id_str);
             break;
         }
@@ -909,7 +909,7 @@ int kdkey_write_key(apr_pool_t *parent_pool, const char *key_file, struct kdkey_
         s = apr_file_puts(key_start, f);
         if (s != APR_SUCCESS) goto write_error;
         
-        str = apr_psprintf(pool, "%lu\n", ki->key_id);
+        str = apr_psprintf(pool, PRINTF_64"u\n", ki->key_id);
         s = apr_file_puts(str, f);
         if (s != APR_SUCCESS) goto write_error;
 

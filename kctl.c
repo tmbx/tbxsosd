@@ -462,7 +462,7 @@ static int kctl_keysetid_cmd(NO_ARGC, char **argv) {
     key_id_str = argv[2];
     out_key_file = argv[3];
 
-    if (sscanf(key_id_str, "%lu", &new_key_id) < 1) {
+    if (sscanf(key_id_str, PRINTF_64"u", &new_key_id) < 1) {
         KERROR_SET(_kctl_, 1, "Invalid number: %s\n", key_id_str);
         return -1;
     }
@@ -560,7 +560,7 @@ static int kctl_printkey_cmd(NO_ARGC, char **argv) {
 	memcpy(kludge, key.owner, kludge_s);
 	kludge[kludge_s] = 0;
 	
-	printf("KEY: ID=%lu, ORG=%s, TYPE=%s\n", key.key_id, kludge, key_type);
+	printf("KEY: ID="PRINTF_64"u, ORG=%s, TYPE=%s\n", key.key_id, kludge, key_type);
         r = 0;
 	
     } while (0);
@@ -578,7 +578,7 @@ static int kctl_genkeys_cmd(NO_ARGC, char **argv) {
     char *file_base, *owner;
     int err;
 
-    if (sscanf(argv[2], "%lu", &key_id) < 1) {
+    if (sscanf(argv[2], PRINTF_64"u" , &key_id) < 1) {
         KERROR_SET(_kctl_, 1, "Invalid number: %s\n", argv[2]);
         return -1;
     }

@@ -316,7 +316,7 @@ int kddb_login(apr_pool_t *pool,
         if (login_ok) {
             if (kddbuser_get_key_id(db->user_db, user->prof_id, &user->key_id) < 0) {
                 KERROR_PUSH(_db_, 0, 
-                            "failed to find key ID for profile %llu", user->prof_id);
+                            "failed to find key ID for profile "PRINTF_64"u", user->prof_id);
                 return -1;
             }            
 
@@ -551,7 +551,7 @@ int kddb_otut_login(apr_pool_t *pool,
 }
 
 int kddb_otut_ticket_store(uint64_t key_id, struct timeval *tm) {
-    DEBUG(_log_db_, "Storing OTUT ticket for key ID: %llu", key_id);
+    DEBUG(_log_db_, "Storing OTUT ticket for key ID: "PRINTF_64"u", key_id);
 
     if (kddbotut_store_ticket(db->otut_db, key_id, tm) < 0) {
         KERROR_PUSH(_otut_, 0, "failed to store OTUT ticket");
@@ -576,7 +576,7 @@ int kddb_otut_store(const char *otut_str,
         return -1;
     }
 
-    DEBUG(_log_db_, "Stored OTUT (key ID %llu, nb_uses: %d, nb_tries: %d).", key_id, nb_use, nb_tries);
+    DEBUG(_log_db_, "Stored OTUT (key ID "PRINTF_64"u, nb_uses: %d, nb_tries: %d).", key_id, nb_use, nb_tries);
 
     return 0;
 }
@@ -678,7 +678,7 @@ int kddb_event(apr_pool_t *pool,
 		vars[i][1] = apr_psprintf(ev_pool, "%u", (uint32_t)event_vars[i].val.uint32);
 		break;
 	    case EV_VAR_UINT64:
-		vars[i][1] = apr_psprintf(ev_pool, "%lu", (uint64_t)event_vars[i].val.uint64);
+		vars[i][1] = apr_psprintf(ev_pool, PRINTF_64"u", (uint64_t)event_vars[i].val.uint64);
 		break;
 	    }
 	}
@@ -717,11 +717,11 @@ int kddb_fetch_key(apr_pool_t *pool,
 
     switch (ktype) {
     case SKEY_ENCRYPTION:
-        DEBUG(_log_db_, "Fetching private encryption key %llu.", key_id);
+        DEBUG(_log_db_, "Fetching private encryption key "PRINTF_64"u.", key_id);
 
     case SKEY_SIGNATURE:
         if (ktype == SKEY_SIGNATURE)
-            DEBUG(_log_db_, "Fetching private signature key %llu.", key_id);
+            DEBUG(_log_db_, "Fetching private signature key "PRINTF_64"u.", key_id);
 
         err = kddbskey_get(db->skey_db, pool, ktype, key_id, ki);
         if (err < 0) {
@@ -731,11 +731,11 @@ int kddb_fetch_key(apr_pool_t *pool,
         break;
 
     case PKEY_ENCRYPTION:
-        DEBUG(_log_db_, "Fetching public encryption key %llu.", key_id);
+        DEBUG(_log_db_, "Fetching public encryption key "PRINTF_64"u.", key_id);
 
     case PKEY_SIGNATURE:
         if (ktype == PKEY_SIGNATURE)
-            DEBUG(_log_db_, "Fetching public signature key %llu.", key_id);
+            DEBUG(_log_db_, "Fetching public signature key "PRINTF_64"u.", key_id);
 
         err = kddbpkey_get(db->pkey_db, pool, ktype, key_id, ki);
         if (err < 0) {
@@ -813,7 +813,7 @@ int kddb_search_enc_pkey(apr_pool_t *key_pool,
     
         /* Fetch the key we found above. */
         if (kddbpkey_get(db->pkey_db, key_pool, PKEY_ENCRYPTION, key_id, ki) <= 0) {
-            KERROR_PUSH(_db_, 0, "Cannot get key for key id %lu.", key_id);        
+            KERROR_PUSH(_db_, 0, "Cannot get key for key id "PRINTF_64"u.", key_id);        
             r = -1;
             break;
         }

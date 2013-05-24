@@ -87,7 +87,7 @@ enum client_state kdclient_get_enc_key_request(kdclient *self,
             else {
                 if (in_pkt->major >= 3) {
                     if (kdkey_sign_key(ki, signed_key, 1)) {                
-                        kdclient_error("Failed to sign the public key %llu.", ki->key_id);
+                        kdclient_error("Failed to sign the public key "PRINTF_64"u.", ki->key_id);
                         *out_pkt = kdpacket_new(pkt_pool, PKT_FAIL);
                         next_state = CSTATE_DROP_ACK;
                         goto err;
@@ -155,11 +155,11 @@ enum client_state kdclient_get_enc_key_by_id_request(kdclient *self,
 
     kdpacket_get_uint64(in_pkt, EL_KEYID, &key_id);
 
-    INFO(_log_client_, "Key request for %llu.", key_id);
+    INFO(_log_client_, "Key request for "PRINTF_64"u.", key_id);
 
     do {
         if (kdkey_get_key(pool, key_id, PKEY_ENCRYPTION, &ki) <= 0) {
-            kdclient_error("Failed to fetch key %llu.", key_id);
+            kdclient_error("Failed to fetch key "PRINTF_64"u.", key_id);
             *out_pkt = kdpacket_new(pkt_pool, PKT_FAIL);
             break;
         }
@@ -167,14 +167,14 @@ enum client_state kdclient_get_enc_key_by_id_request(kdclient *self,
         /* We only have to sign the key with version 3.x and above. */
         if (in_pkt->major >= 3) {
             if (kdkey_sign_key(ki, signed_key, 0)) {
-                kdclient_error("Failed to sign the public key %llu.", key_id);
+                kdclient_error("Failed to sign the public key "PRINTF_64"u.", key_id);
                 *out_pkt = kdpacket_new(pool, PKT_FAIL);
                 next_state = CSTATE_DROP_ACK;
                 break;
             }
         }
 
-        INFO(_log_client_, "Key request for %llu successful.", key_id);
+        INFO(_log_client_, "Key request for "PRINTF_64"u successful.", key_id);
 
         /* Success! Prepare the outgoing packet. */
         *out_pkt = kdpacket_new(pkt_pool, PKT_GET_ENC_KEY_BY_ID_RES);
@@ -227,11 +227,11 @@ enum client_state kdclient_get_sign_key_request(kdclient *self,
 
     kdpacket_get_uint64(in_pkt, EL_KEYID, &key_id);
 
-    INFO(_log_client_, "Key request for %llu.", key_id);
+    INFO(_log_client_, "Key request for "PRINTF_64"u.", key_id);
 
     do {
         if (kdkey_get_key(pool, key_id, PKEY_SIGNATURE, &ki) <= 0) {
-            kdclient_error("Failed to fetch key %llu.", key_id);
+            kdclient_error("Failed to fetch key "PRINTF_64"u.", key_id);
             *out_pkt = kdpacket_new(pkt_pool, PKT_FAIL);
             break;
         }
@@ -239,14 +239,14 @@ enum client_state kdclient_get_sign_key_request(kdclient *self,
         /* We only have to sign the key with version 3.x and above. */
         if (in_pkt->major >= 3) {
             if (kdkey_sign_key(ki, signed_key, 0)) {
-                kdclient_error("Failed to sign the public key %llu.", key_id);
+                kdclient_error("Failed to sign the public key "PRINTF_64"u.", key_id);
                 *out_pkt = kdpacket_new(pool, PKT_FAIL);
                 next_state = CSTATE_DROP_ACK;
                 break;
             }
         }
 
-        INFO(_log_client_, "Key request for %llu successful.", key_id);
+        INFO(_log_client_, "Key request for "PRINTF_64"u successful.", key_id);
 
         /* Success! Prepare the outgoing packet. */
         *out_pkt = kdpacket_new(pkt_pool, PKT_GET_SIGN_KEY_RES);

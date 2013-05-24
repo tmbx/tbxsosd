@@ -163,7 +163,7 @@ static int el_printer_generic_uint64(U kdprotocol *self, enum proto_el_id id,
     uint64_t n;
 
     kdpacket_get_uint64(pkt, id, &n);
-    DEBUG(_log_knp_, "uint64 '%s': %llu", el_name, n);
+    DEBUG(_log_knp_, "uint64 '%s': "PRINTF_64"u", el_name, n);
 
     return 0;
 }

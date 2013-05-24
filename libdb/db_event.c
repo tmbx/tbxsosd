@@ -190,7 +190,7 @@ static int kddbevent_add_variable(kddbevent *self,
            successful. */
         if (PQresultStatus(db_res) != PGRES_TUPLES_OK) {
             kdsql_error_pgsql(self->db->conn);
-            KERROR_PUSH(_db_, 0, "query error while adding variable %s to event %llu",
+            KERROR_PUSH(_db_, 0, "query error while adding variable %s to event "PRINTF_64"u",
                         var[0], event_id);
             break;
         }
@@ -245,7 +245,7 @@ int kddbevent_add(kddbevent *self,
         /* Add the variables to the event. */
         for (i = 0; i < n; i++) {
             if (kddbevent_add_variable(self, hostname, event_counter, session_id, vars[i]) < 0) {
-                KERROR_PUSH(_db_, 0, "failed to add a variable to event %llu", event_id);
+                KERROR_PUSH(_db_, 0, "failed to add a variable to event "PRINTF_64"u", event_id);
                 err = -1;
                 break;
             }

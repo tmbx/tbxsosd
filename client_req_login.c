@@ -127,7 +127,7 @@ static int kdclient_load_user_keys(struct kd_user *user) {
 
     err = kdkey_get_sig_skey(user->pool, user->key_id, &user->sig_skey);
     if (err < 0) {
-        KERROR_PUSH(_client_, 0, "error while trying to fetch private signature key %llu", 
+        KERROR_PUSH(_client_, 0, "error while trying to fetch private signature key "PRINTF_64"u", 
                     user->key_id);
         return -1;
     }
@@ -136,7 +136,7 @@ static int kdclient_load_user_keys(struct kd_user *user) {
 
     err = kdkey_get_sig_pkey(user->pool, user->key_id, &user->sig_pkey);
     if (err < 0) {
-        KERROR_PUSH(_client_, 0, "error while trying to fetch public signature key %llu",
+        KERROR_PUSH(_client_, 0, "error while trying to fetch public signature key "PRINTF_64"u",
                     user->key_id);
         return -1;
     }
@@ -155,7 +155,7 @@ static int kdclient_load_user_keys(struct kd_user *user) {
     
     err = kdkey_get_enc_skey(user->pool, user->key_id, &user->enc_skey);
     if (err < 0) {
-        KERROR_PUSH(_client_, 0, "error while trying to fetch private signature key %llu",
+        KERROR_PUSH(_client_, 0, "error while trying to fetch private signature key "PRINTF_64"u",
                     user->key_id);
         return -1;
     } else if (err == 0)
@@ -163,7 +163,7 @@ static int kdclient_load_user_keys(struct kd_user *user) {
 
     err = kdkey_get_enc_pkey(user->pool, user->key_id, &user->enc_pkey);
     if (err < 0) {
-        KERROR_PUSH(_client_, 0, "error while trying to fetch public encryption key %llu",
+        KERROR_PUSH(_client_, 0, "error while trying to fetch public encryption key "PRINTF_64"u",
                     user->key_id);
         return -1;
     }
