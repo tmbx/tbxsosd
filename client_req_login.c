@@ -30,7 +30,6 @@
 
 #include "common_pkg.h"
 
-#include "license.h"
 #include "db.h"
 #include "logid.h"
 #include "logging.h"
@@ -39,80 +38,6 @@
 #include "shared.h"
 #include "utils.h"
 #include "keys.h"
-
-static int kdclient_check_seats(kdclient *self, 
-                                apr_pool_t *parent_pool, 
-                                uint64_t org_id, 
-                                struct kd_license *lic) {
-    int err = -1;
-    int db_seats, alloc_seats;
-    apr_pool_t *pool;
-
-    /* Check if there is a reseller allocation for this organization. */
-    if (kddb_get_seats_allocation(org_id, &alloc_seats) < 0) {
-        KERROR_PUSH(_client_, 0, "failed to obtain seat allocation for organization %s", lic->kdn);
-        return err;
-    }    
-
-    /* Check license count. */
-    if (kddb_count_seats(org_id, &db_seats) < 0) {
-        KERROR_PUSH(_client_, 0, "failed to obtain seat count");
-        return err;
-    }
-
-    /* Seats overflow. */
-    if (lic->max_seats >= 0 && db_seats >= lic->max_seats) {
-        KERROR_SET(_client_, 1, 
-                   "maximum number of allowed seats are occupied for the organization %s", lic->kdn);
-        return err;
-    }
-        
-    /* Check the reseller imposed limit if it is there. */
-    if (lic->parent_kdn && alloc_seats >= 0 && db_seats >= alloc_seats) {
-        KERROR_SET(_client_, 1,
-                   "maximum number of allowed seats are occupied for the organization %s, "
-                   "as allocated by %s", 
-                   lic->kdn, lic->parent_kdn);
-        return err;
-    }
-    
-    /* Seats limit. */
-    if (lic->lim_seats >= 0 && db_seats + 1 >= lic->lim_seats) {
-        WARN(_log_client_, "License usage higher than allowed: %d of %d.", db_seats + 1, lic->lim_seats);
-        WARN(_log_client_, "Please make sure you obtain a new license before you reach more than %d users.", lic->max_seats);
-    }
-
-    /* If the license has a parent, repeat the process for the parent
-       organization. */
-    if (lic->parent_kdn != NULL && strcmp(lic->parent_kdn, "") != 0) {
-        struct kd_organization org;
-        struct kd_license plic;
-
-        apr_pool_create(&pool, parent_pool);
-
-        /* Obtain the parent license data. */
-        if (kddb_get_org_data_from_kdn(pool, lic->parent_kdn, &org) < 0) {
-            KERROR_PUSH(_client_, 0, "failed to obtain parent KDN");
-            err = -1;
-        }
-        else {        
-            /* Decode the parent license. */
-            if (kdlicense_new(pool, org.license, &plic) < 0) 
-                KERROR_PUSH(_client_, 0, "failed to decode license");
-            else {
-                if (kdlicense_check(&plic) < 0) 
-                    KERROR_PUSH(_client_, 0, "license for %s is invalid", lic->parent_kdn);
-                else
-                    /* Check the number of seat of the parent. */
-                    if (kdclient_check_seats(self, pool, org.org_id, &plic) == 0) 
-                        err = 0;
-            }
-        }
-    } 
-    else err = 0;
-
-    return err;
-}                                
 
 #if defined(REQUEST_OTUT_LOGIN) || defined(REQUEST_LOGIN)
 static int kdclient_load_user_keys(struct kd_user *user) {
@@ -249,7 +174,7 @@ enum client_state kdclient_login_user_request(kdclient *self,
                                               apr_pool_t *out_pkt_pool,
                                               struct kdpacket *in_pkt,
                                               struct kdpacket **out_pkt)  {	
-    int n, has_lic, has_seat;
+    int n;
     uint32_t is_password;
     enum client_state next_state = self->cstate;
     const char *username = NULL;
@@ -305,72 +230,8 @@ enum client_state kdclient_login_user_request(kdclient *self,
             break;
         }
 
-        /* Load the user's license. */
-        has_lic = self->user->org.license != NULL && strlen(self->user->org.license) > 0;
-        has_seat = !(login_result->rights == LOGIN_RIGHTS_OK_NEW);
-
-        if (has_lic) {
-            if (kdlicense_new(pool, self->user->org.license, &lic) < 0) {
-                kdclient_error("Failed to read license.");
-                next_state = CSTATE_DROP_ACK;
-                break;
-            }
-        } 
-#ifndef KD_DEBUG
-        /* User that use tbxsosd for development won't ever be
-           bothered to generate and insert a valid license in the
-           database. */
-        else {
-            kdclient_error("User has no license to use the KPS.");
-            next_state = CSTATE_DROP_ACK;
-            break;
-        }
-
-#endif // KD_DEBUG
-        if (has_lic) {
-            /* Check the license validity. */
-            if (kdlicense_check(&lic) < 0) {
-                kdclient_error("License is invalid.");
-                next_state = CSTATE_DROP_ACK;
-                break;
-            }
-
-            /* If the user has no seat reserved for him, we need to
-               add one. */
-            if (!has_seat) {
-                struct kd_organization org_data;
-                uint64_t *poid = NULL;
-
-                /* Check if there is enough seats for the new client. */
-                if (kdclient_check_seats(self, pool, self->user->org.org_id, &lic) < 0) {
-                    kdclient_error("Cannot login due to license problems.");
-                    next_state = CSTATE_DROP_ACK;
-                    break;
-                }
-
-                if (lic.parent_kdn != NULL) {
-                    if (kddb_get_org_data_from_kdn(pool, lic.parent_kdn, &org_data) < 0) {
-                        kdclient_error("Parent KDN organisation %s not found.", lic.parent_kdn);
-                        next_state = CSTATE_DROP_ACK;
-                        break;
-                    }
-                    else poid = &org_data.org_id;
-                }
-
-                if (kddb_reserve_seat(username, self->user->org.org_id, poid) < 0) {
-                    kdclient_error("Failed to reserve seat for new client.");
-                    next_state = CSTATE_DROP_ACK;
-                    break;
-                }
-            }
-
-            /* Set the capabilities of the user to those of the
-               license.  It's a XOR. */
-            self->user->lic = lic.caps;        
-        }
-        /* Free for all. */
-        else 
-            self->user->lic = CAN_DO_EVERYTHING;
+        /* The old licensing code was here. */
+        self->user->lic = CAN_DO_EVERYTHING;
 
         /* If the flow reaches this point, that means the login is okay. */
         INFO(_log_client_, "Request: Login [user: %s] successful.", username);

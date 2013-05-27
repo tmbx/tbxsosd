@@ -163,12 +163,6 @@ struct kd_package {
     /** Subject. */
     const char *subject;
 
-    /* License data. */
-    int with_license;
-    uint32_t license_max;
-    uint32_t license_lim;
-    const char *license_kdn;
-
     /* Packet version. */
     uint32_t major;
     uint32_t minor;
