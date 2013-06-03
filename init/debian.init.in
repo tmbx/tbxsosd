@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 ### BEGIN INIT INFO
 # Provides:          tbxsosd
@@ -13,17 +13,15 @@
 # Do NOT "set -e"
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:@@PREFIX@@/bin
 DESC="Teambox Sign-On Server Daemon"
 NAME=tbxsosd
-#DAEMON=/usr/sbin/$NAME
-DAEMON=/usr/bin/tbxsosd
-#PIDFILE=/var/run/$NAME.pid
+DAEMON=@@PREFIX@@/bin/tbxsosd
 PIDFILE=/var/run/tbxsosd.pid
 SCRIPTNAME=/etc/init.d/$NAME
 LD_LIBRARY_PATH=@@PREFIX@@/lib
 
-export LD_LIBRARY_PATH
+export LD_LIBRARY_PATH PATH
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
