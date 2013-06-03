@@ -1,5 +1,15 @@
 #! /bin/sh
 
+### BEGIN INIT INFO
+# Provides:          tbxsosd
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Teambox Sign-On Server Daemon
+# Description:       Teambox Sign-On Server Daemon
+### END INIT INFO
+
 # Do NOT "set -e"
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
@@ -12,6 +22,8 @@ DAEMON=/usr/bin/tbxsosd
 PIDFILE=/var/run/tbxsosd.pid
 SCRIPTNAME=/etc/init.d/$NAME
 LD_LIBRARY_PATH=@@PREFIX@@/lib
+
+export LD_LIBRARY_PATH
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
