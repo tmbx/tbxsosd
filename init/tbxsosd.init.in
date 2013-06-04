@@ -19,9 +19,6 @@ NAME=tbxsosd
 DAEMON=@@PREFIX@@/bin/tbxsosd
 PIDFILE=/var/run/tbxsosd.pid
 SCRIPTNAME=/etc/init.d/$NAME
-LD_LIBRARY_PATH=@@PREFIX@@/lib
-
-export LD_LIBRARY_PATH PATH
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
