@@ -24,8 +24,9 @@
 #include <kerror.h>
 #include <kmem.h>
 
+#include "common/logid.h"
+
 #include "logging.h"
-#include "logid.h"
 #include "conf.h"
 #include "options.h"
 

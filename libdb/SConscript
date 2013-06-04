@@ -31,7 +31,7 @@ libdb_FILES = ['db.c',
                'ldapdb_utils.c']
 
 # Build the library.
-cpp_path = env['CPPPATH'] + ['#libutils', '#common']
+cpp_path = env['CPPPATH'] + ['#.']
 libdb = env.StaticLibrary('tbxsosd_db',
                           libdb_FILES,
                           CPPPATH = cpp_path)

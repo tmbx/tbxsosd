@@ -24,7 +24,7 @@
 
 #include <apr_pools.h>
 
-#include "common.h"
+#include "common/common.h"
 #include "db_psql.h"
 
 struct __kddblogin {

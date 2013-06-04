@@ -20,9 +20,10 @@
 #include <kerror.h>
 #include <kmem.h>
 
+#include "common/logid.h"
+
 #include "process.h"
 #include "logging.h"
-#include "logid.h"
 #include "utils.h"
 
 static int blocked_signals[] = {SIGCHLD, 0};

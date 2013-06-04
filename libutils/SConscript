@@ -26,7 +26,7 @@ libutils_FILES = ['conf.l',
                   'mime.c']
 
 # Build the library.
-cpp_path = env['CPPPATH'] + ['#libutils', '#common', '#libcomm']
+cpp_path = env['CPPPATH'] + ['#.']
 libutils = env.StaticLibrary('tbxsosd_utils',
                              libutils_FILES,
                              CPPPATH = cpp_path)

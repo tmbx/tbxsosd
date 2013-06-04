@@ -26,13 +26,13 @@
 #include <ktools.h>
 #include <string.h>
 
-#include "common_keys.h"
-#include "common.h"
+#include "common/common_keys.h"
+#include "common/common.h"
+#include "common/logid.h"
+#include "common/config.h"
+#include "libutils/options.h"
+#include "libutils/logging.h"
 
-#include "config.h"
-#include "options.h"
-#include "logid.h"
-#include "logging.h"
 #include "ldapdb.h"
 #include "ldapdb_base.h"
 

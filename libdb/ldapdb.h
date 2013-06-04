@@ -29,8 +29,9 @@
 
 typedef struct __kdldap kdldap;
 
-#include "common.h"
-#include "db.h"
+#include "common/common.h"
+#include "libdb/db.h"
+
 #include "ldapdb_servers.h"
 
 struct __kdldap {

@@ -24,13 +24,14 @@
 #include <kerror.h>
 #include <stdlib.h>
 
-#include "logid.h"
+#include "common/logid.h"
+#include "libutils/logging.h"
+#include "libutils/utils.h"
+#include "libutils/options.h"
+
 #include "db.h"
 #include "db_psql.h"
 #include "db_login.h"
-#include "utils.h"
-#include "options.h"
-#include "logging.h"
 
 static struct db_statement db_stmts[6] = {
     {

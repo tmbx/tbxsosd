@@ -24,8 +24,8 @@
 
 #include <apr_ring.h>
 
-#include "common_msg.h"
-#include "config.h"
+#include "common/common_msg.h"
+#include "common/config.h"
 
 typedef struct __kdfilter kdfilter;
 

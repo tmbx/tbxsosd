@@ -21,7 +21,7 @@
 
 #include <kerror.h>
 
-#include "logid.h"
+#include "common/logid.h"
 #include "db_psql.h"
 #include "db_event.h"
 

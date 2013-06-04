@@ -22,36 +22,6 @@ EnsurePythonVersion(2,3)
 SourceSignatures('MD5')
 TargetSignatures('content')
 
-shared_FILES = ['license.c',
-                'keys.c',
-                'shared.c']
-
-kctl_FILES = ['kctl.c']
-
-tbxsosdcfg_FILES = ['tbxsosdcfg.c']
-
-tbxsosd_FILES = ['client.c',
-                   'child.c',
-                   'childset.c',
-                   'dpkg.c',
-                   'main.c',
-                   'otut.c',
-                   'package.c',
-                   'podder.c',
-                   'server.c',
-                   'packet.c',
-                   'proto.c',
-                   'proto_defs.c',
-                   'proto_funcs.c',
-                   'signals.c',
-                   'client_req_pkg.c',
-                   'client_req_login.c',
-                   'client_req_dpkg.c',
-                   'client_req_key.c',
-		   'client_req_kws.c',
-                   'client_req_otut.c',
-                   'client_req_misc.c']
-
 opts = Options('build.conf')
 opts.AddOptions(
     ListOption('build_type', 'Server build configuration', 'full',
@@ -231,63 +201,7 @@ bc = conf_options['build_conf']
 # Target linking.
 #
 
-# Setup the correct config file path.  If the single_dir option is set
-# to yes, set the config file path variable to the name of the config
-# file
-conf_options['config_path'] = str(env['CONFDIR'])
-
-def config_h_build(target, source, env):
-    config_h_defines = conf_options
-  
-    for a_target, a_source in zip(target, source):
-        config_h = file(str(a_target), "w")
-        config_h_in = file(str(a_source), "r")
-        config_h.write(config_h_in.read() % config_h_defines)
-        config_h_in.close()
-        config_h.close()
-
-def kctl_link(target, source, env):
-    for a_target, a_source in zip(target, source):
-        if not os.path.exists(str(a_target)):
-            os.symlink(str(a_source), str(a_target))
-
-shared_OBJS = []
-tbxsosd_OBJS = []
-tbxsosdcfg_OBJS = []
-kctl_OBJS = []
-
-for s in shared_FILES:
-    n = os.path.splitext(s)[0]
-    cpp_path = env['CPPPATH'] + ['common', 'libutils', 'libdb', 'libfilters', 'libcomm']
-    o = env.Object(target = 'build/' + n, source = s, CPPPATH = cpp_path)
-    shared_OBJS.append(o);
-
-for s in tbxsosdcfg_FILES:
-    n = os.path.splitext(s)[0]
-    cpp_path = env['CPPPATH'] + ['common', 'libutils', 'libdb', 'libfilters', 'libcomm']
-    o = env.Object(target = 'build/' + n, source = s, CPPPATH = cpp_path)
-    tbxsosdcfg_OBJS.append(o)
-
-for s in tbxsosd_FILES:
-    n = os.path.splitext(s)[0]
-    cpp_path = env['CPPPATH'] + ['common', 'libutils', 'libdb', 'libfilters', 'libcomm']
-    o = env.Object(target = 'build/' + n, source = s, CPPPATH = cpp_path)
-    tbxsosd_OBJS.append(o)
-
-for s in kctl_FILES:
-    n = os.path.splitext(s)[0]
-    cpp_path = env['CPPPATH'] + ['common', 'libutils', 'libdb', 'libfilters', 'libcomm']
-    o = env.Object(target = 'build/' + n, source = s, CPPPATH = cpp_path)
-    kctl_OBJS.append(o)
-
-tbxsosd_OBJS += shared_OBJS
-kctl_OBJS += shared_OBJS
-tbxsosdcfg_OBJS += shared_OBJS
-
-# Add the configuration file targets
-env.AlwaysBuild(env.Command('common/config.h', 'common/config.h.in', config_h_build))
-
-# Build the support libraries.
+# Support libraries.
 libfilters = SConscript('libfilters/SConscript',
                         exports = 'env',
                         build_dir = 'build/libfilters',
@@ -308,18 +222,14 @@ libcomm = SConscript('libcomm/SConscript',
                      build_dir = 'build/libcomm',
                      src_dir = 'libcomm',
                      duplicate = 0)
+
+# Main source
+SConscript('src/SConscript',
+           exports = 'env conf_options',
+           build_dir = 'build/src',
+           src_dir = 'src',
+           duplicate = 0)
                                 
-# Build the programs.
-prog_tbxsosd = env.Program('tbxsosd',
-                             tbxsosd_OBJS + libdb + libfilters + libutils + libcomm,
-                             LIBS = env['LIBS'] + env['tbxsosd_LIBS'])
-prog_kctl = env.Program('kctlbin',
-                        kctl_OBJS + libdb + libcomm + libutils)
-
-prog_tbxsosdcfg = env.Program('tbxsosdcfg', 
-                                tbxsosdcfg_OBJS + libutils + libdb,
-                                LIBS = env['LIBS'] + env['tbxsosd_LIBS'])
-
 # Check the paths.
 if env['single_dir']:
     prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])

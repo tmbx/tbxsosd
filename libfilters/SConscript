@@ -22,7 +22,7 @@ libfilters_FILES = ['filter_spam.c',
                     'filters.c']
 
 # Build the library.
-cpp_path = env['CPPPATH'] + ['#libutils', '#common', '#libcomm', '#libdb']
+cpp_path = env['CPPPATH'] + ['#.']
 libfilters = env.StaticLibrary('tbxsosd_filters',
                                libfilters_FILES,
                                CPPPATH = cpp_path)

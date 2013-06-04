@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "logid.h"
+#include "common/logid.h"
 #include "db_psql.h"
 #include "db_otut.h"
 

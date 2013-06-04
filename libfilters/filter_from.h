@@ -23,7 +23,7 @@
 #define _FILTER_FROM_H
 
 #include "filters.h"
-#include "db.h"
+#include "libdb/db.h"
 
 extern struct filter_driver filter_from;
 

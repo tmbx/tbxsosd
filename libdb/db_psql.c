@@ -29,10 +29,11 @@
 #include <kerror.h>
 #include <unistd.h>
 
-#include "options.h"
-#include "logid.h"
+#include "common/logid.h"
+#include "libutils/options.h"
+#include "libutils/logging.h"
+
 #include "db_psql.h"
-#include "logging.h"
 
 struct kdsql_conn_link {
     kdsql *db;

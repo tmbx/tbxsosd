@@ -21,10 +21,11 @@
 #include <apr_ring.h>
 #include <kerror.h>
 
-#include "options.h"
+#include "common/logid.h"
+#include "libutils/options.h"
+#include "libutils/logging.h"
+
 #include "filters.h"
-#include "logid.h"
-#include "logging.h"
 #include "filter_spam.h"
 #include "filter_virus.h"
 #include "filter_from.h"

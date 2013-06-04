@@ -24,8 +24,9 @@
 #include <stdlib.h>
 #include <kerror.h>
 
-#include "common.h"
-#include "logid.h"
+#include "common/common.h"
+#include "common/logid.h"
+
 #include "db_psql.h"
 #include "db_user.h"
 

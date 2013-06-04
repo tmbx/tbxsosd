@@ -33,8 +33,9 @@
 #include <grp.h>
 #include <unistd.h>
 
+#include "common/logid.h"
+
 #include "utils.h"
-#include "logid.h"
 #include "logging.h"
 
 int set_gid_name(apr_pool_t *pool, const char *group) {

@@ -24,18 +24,19 @@
 #include <apr_user.h>
 #include <kerror.h>
 
-#include "config.h"
-#include "options.h"
-#include "common.h"
+#include "common/config.h"
+#include "common/common.h"
+#include "common/logid.h"
+#include "libutils/options.h"
+#include "libutils/logging.h"
+
 #include "db.h"
-#include "logid.h"
 #include "ldapdb.h"
 #include "db_psql.h"
 #include "db_user.h"
 #include "db_pkey.h"
 #include "db_skey.h"
 #include "db_login.h"
-#include "logging.h"
 
 static kddb *db;
 

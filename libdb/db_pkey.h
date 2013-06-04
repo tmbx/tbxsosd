@@ -22,7 +22,7 @@
 #ifndef _DB_PKEY_H
 #define _DB_PKEY_H
 
-#include "common_keys.h"
+#include "common/common_keys.h"
 #include "db_psql.h"
 
 /** Public key database private informations. */
