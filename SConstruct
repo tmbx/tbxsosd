@@ -19,18 +19,16 @@ import commands, os, sys, glob, re
 # Per Laurent Birtz example.
 SConsignFile("/tmp/tbxsosd.sconsign.dblite")
 EnsurePythonVersion(2,3)
-SourceSignatures('MD5')
-TargetSignatures('content')
 
-opts = Options('build.conf')
-opts.AddOptions(
-    ListOption('build_type', 'Server build configuration', 'full',
+opts = Variables('build.conf')
+opts.AddVariables(
+    ListVariable('build_type', 'Server build configuration', 'full',
                ['tbxsos', 'eks', 'iks', 'full', 'kos', 'keyserver']),
-    BoolOption('mudflap', 'Build with mudflap (gcc 4.x)', 0),
-    BoolOption('mpatrol', 'Build with mpatrol', 0),
-    BoolOption('debug', 'Compile with all debug options turned on', 1),
-    BoolOption('db_debug', 'Compile with database debug option', 1),
-    BoolOption('single_dir', 'Install everything in the same directory', 0),
+    BoolVariable('mudflap', 'Build with mudflap (gcc 4.x)', 0),
+    BoolVariable('mpatrol', 'Build with mpatrol', 0),
+    BoolVariable('debug', 'Compile with all debug options turned on', 1),
+    BoolVariable('db_debug', 'Compile with database debug option', 1),
+    BoolVariable('single_dir', 'Install everything in the same directory', 0),
     ('libktools_include', 'Location of include files for libktools', '#../libktools/src'),
     ('libktools_libpath', 'Location of library files for libktools', '#../libktools/build'),
     ('tagcrypt_include', 'Location of include files for tagcrypt', '#../tagcrypt'),
@@ -204,29 +202,29 @@ bc = conf_options['build_conf']
 # Support libraries.
 libfilters = SConscript('libfilters/SConscript',
                         exports = 'env',
-                        build_dir = 'build/libfilters',
+                        variant_dir = 'build/libfilters',
                         src_dir = 'libfilters',
                         duplicate = 0)
 libutils = SConscript('libutils/SConscript',
                       exports = 'env',
-                      build_dir = 'build/libutils',
+                      variant_dir = 'build/libutils',
                       src_dir = 'libutils',
                       duplicate = 0)
 libdb = SConscript('libdb/SConscript',
                    exports = 'env',
-                   build_dir = 'build/libdb',
+                   variant_dir = 'build/libdb',
                    src_dir = 'libdb',
                    duplicate = 0)
 libcomm = SConscript('libcomm/SConscript',
                      exports = 'env',
-                     build_dir = 'build/libcomm',
+                     variant_dir = 'build/libcomm',
                      src_dir = 'libcomm',
                      duplicate = 0)
 
 # Main source
 SConscript('src/SConscript',
            exports = 'env conf_options',
-           build_dir = 'build/src',
+           variant_dir = 'build/src',
            src_dir = 'src',
            duplicate = 0)
                                 
