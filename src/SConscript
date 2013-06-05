@@ -114,3 +114,5 @@ prog_kctl = env.Program('kctlbin',
 prog_tbxsosdcfg = env.Program('tbxsosdcfg', 
                               tbxsosdcfg_OBJS + libutils + libdb,
                               LIBS = env['LIBS'] + env['tbxsosd_LIBS'])
+
+Return("prog_tbxsosd prog_kctl prog_tbxsosdcfg")

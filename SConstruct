@@ -222,7 +222,7 @@ libcomm = SConscript('libcomm/SConscript',
                      duplicate = 0)
 
 # Main source
-SConscript('src/SConscript',
+(prog_tbxsosd, prog_kctl, prog_tbxsosdcfg) = SConscript('src/SConscript',
            exports = 'env conf_options libfilters libutils libdb libcomm',
            variant_dir = 'build/src',
            src_dir = 'src',
@@ -246,5 +246,4 @@ if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
         env.Install(bindir, prog_tbxsosdcfg)
         
 env.Alias('install', bindir)
-env.Alias('install', confdir)
        
