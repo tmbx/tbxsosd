@@ -14,6 +14,10 @@
 # limitations under the License.
 
 import os
+Import('libdb')
+Import('libfilters')
+Import('libutils')
+Import('libcomm')
 Import('env')
 Import('conf_options')
 
@@ -99,5 +103,14 @@ tbxsosd_OBJS += shared_OBJS
 kctl_OBJS += shared_OBJS
 tbxsosdcfg_OBJS += shared_OBJS
 
-# Add the configuration file targets
 env.AlwaysBuild(env.Command('#common/config.h', '#common/config.h.in', config_h_build))
+
+# Add the configuration file targets
+prog_tbxsosd = env.Program('tbxsosd',
+                           tbxsosd_OBJS + libdb + libfilters + libutils + libcomm,
+                           LIBS = env['LIBS'] + env['tbxsosd_LIBS'])
+prog_kctl = env.Program('kctlbin',
+                        kctl_OBJS + libdb + libcomm + libutils)
+prog_tbxsosdcfg = env.Program('tbxsosdcfg', 
+                              tbxsosdcfg_OBJS + libutils + libdb,
+                              LIBS = env['LIBS'] + env['tbxsosd_LIBS'])

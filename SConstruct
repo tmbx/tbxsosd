@@ -223,7 +223,7 @@ libcomm = SConscript('libcomm/SConscript',
 
 # Main source
 SConscript('src/SConscript',
-           exports = 'env conf_options',
+           exports = 'env conf_options libfilters libutils libdb libcomm',
            variant_dir = 'build/src',
            src_dir = 'src',
            duplicate = 0)
