@@ -1,0 +1,71 @@
+#!/usr/bin/python
+#
+# This is a fscking melting pot of a program doing the best it can to
+# move a set of data from one KPS to another.
+
+import sys, os, acttools
+from kctllib.kdatabase import *
+
+class ExitException(Exception): pass
+
+def find_org(org_kdn):
+    activators = acttools.list_activators("/etc/teambox")
+    org_id = None
+    for act in activators:
+        if act.identity and act.identity.kdn:
+            if act.identity.kdn == org_kdn:
+                org_id = act.identity.org_id
+    return org_id
+    
+def main(org_kdn, input_file):
+    db_init()
+    org_id = find_org(org_kdn)
+    if not org_id:
+        raise ExitException("Unable to find activated organization %s.\n" % org_kdn)
+    try:
+        while True:
+            line = input_file.readline()
+            if not line:
+                break
+            _, _, _, key_id, name, username, password, emails = line.strip().split("\t", 7)
+
+            # Split the name in 2.
+            first_name = name
+            last_name = ""
+            if name.find(" ") > -1:
+                first_name, last_name = name.split(" ", 1)
+                
+            prof_id = sdb_adduser(org_id, first_name, last_name)
+            sdb_addlogin(org_id, prof_id, username, password)
+            sdb_setkey(prof_id, key_id)
+
+            has_pemail = False
+            email_ls = emails.split(" ")
+            for e in email_ls:
+                if not has_pemail:
+                    sdb_addpemail(prof_id, e)
+                    has_pemail = True
+                else:
+                    sdb_addemail(prof_id, e)
+    finally:
+        input_file.close()
+    db_commit()
+
+if __name__ == "__main__":
+    try:
+        if len(sys.argv) < 3:
+            raise ExitException("Usage: kctlimport <KDN> <accounts file>.")
+
+        input_file = sys.argv[2]
+        org_kdn = sys.argv[1]
+        if not os.path.exists(input_file):
+            raise ExitException("Account file does not exists.")
+
+        main(sys.argv[1], file(input_file, "r"))
+    except ExitException, ex:
+        sys.stderr.write(ex.message)
+        sys.exit(1)
+    else:
+        sys.exit(1)
+    
+

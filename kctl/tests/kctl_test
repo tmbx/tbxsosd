@@ -1,0 +1,406 @@
+#!/bin/bash
+#
+# Crazy automated tests for KCTL commands
+
+test_count=0
+test_failed=0
+test_succ=0
+kctl=
+
+# Returns true (0) when the called routine succeeds.
+assert() {
+    if eval $@ >/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Return true (0) when the called routine fails.
+nassert() {
+    if eval $@ >/dev/null; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+setup() {
+    local cluster_port
+
+    if ! pg_lsclusters | grep kctl_test >/dev/null; then
+        echo "Please create a kctl_test cluster correctly initialized with the tbxsosd database."
+        exit 1
+    fi
+    cluster_port=$(pg_lsclusters -h | grep kctl_test | awk '{print $3}')
+    kctl="python main.py --debug --db_port=$cluster_port"
+}
+
+# addorg, lsorg
+addorg() {
+    if ! assert $kctl addorg test.organization; then
+        return 1
+    fi
+    if ! assert "$kctl lsorg | grep test.organization | head -1"; then
+        return 1
+    fi
+    return 0
+}
+
+# setorgforwardto, lsorg
+setorgforwardto() {
+    local org
+
+    org=$($kctl lsorg | grep test.organization | head -1 | awk '{print $1}')
+
+    if ! assert $kctl setorgforwardto $org blarg@test; then
+        return 1
+    fi    
+    if ! assert "$kctl lsorg | grep blarg@test"; then
+        return 1
+    fi
+    if ! assert $kctl setorgforwardto $org; then
+        return 1
+    fi
+    if ! nassert "$kctl lsorg | grep blarg@test"; then
+        return 1
+    fi
+    return 0
+}
+
+# setorgstatus, lsorg
+setorgstatus() {
+    local org status
+
+    org=$($kctl lsorg | grep test.organization | head -1 | awk '{print $1}')
+    
+    if ! assert $kctl setorgstatus $org 2; then
+        return 1
+    fi
+
+    status=$($kctl lsorg | grep test.organization | head -1 | awk '{print $4}')
+    if [ "$status" != "2" ]; then
+        echo "Status is $status."
+        return 1
+    fi
+    if ! assert $kctl setorgstatus $org; then
+        return 1
+    fi
+    if ! assert "$kctl lsorg | grep test.organization | head -1 | awk '{print $4}'"; then
+        return 1
+    fi
+    return 0
+}
+
+# rmorg, lsorg
+rmorg() {
+    local org
+
+    org=$($kctl lsorg | grep test.organization | head -1 | awk '{print $1}')
+
+    if ! assert $kctl rmorg $org; then
+        return 1
+    fi
+    if ! nassert "$kctl lsorg | grep test.organization"; then
+        return 1
+    fi
+    return 0
+}
+
+# adduser, lsorg, lsprofiles
+adduser() {
+    local org
+
+    $kctl addorg test.organization >/dev/null
+    
+    org=$($kctl lsorg | grep test.organization | head -1 | awk '{print $1}')
+    
+    if ! assert $kctl adduser $org "First" "Last"; then
+        return 1
+    fi
+    if ! assert "$kctl lsprofiles | grep -q 'First Last'"; then
+        return 1
+    fi
+    return 0
+}
+
+# addpemail, lsprofiles, lsemail
+addpemail() {
+    local prof
+
+    prof=$($kctl lsprofiles | grep "First.*Last" | awk '{print $2}')
+    
+    if ! assert $kctl addpemail $prof test@blarg; then
+        return 1
+    fi
+    if ! assert "$kctl lsemail $prof | grep -q 'test@blarg *'"; then
+        return 1
+    fi
+    return 0
+}
+
+# addemail, lsemail, lsprofiles
+addemail() {
+    local prof
+
+    prof=$($kctl lsprofiles | grep "First Last" | awk '{print $2}')
+
+    if ! assert $kctl addemail $prof test@blarg2; then
+        return 1
+    fi
+    if ! assert "$kctl lsemail $prof | grep -q 'test@blarg2'"; then
+        return 1
+    fi
+    return 0
+}
+
+# addlogin, lsprofiles, lslogin
+addlogin() {
+    local prof org
+
+    prof=$($kctl lsprofiles | grep "First Last" | awk '{print $2}')
+    org=$($kctl lsprofiles | grep "First Last" | awk '{print $1}')
+
+    if ! assert $kctl addlogin $prof $org first last; then
+        return 1
+    fi
+    if ! assert "$kctl lslogin | grep -q 'first.*last'"; then
+        return 1
+    fi
+    return 0
+}
+
+# setkey, lsprofiles, setkey
+setkey() {
+    local prof
+
+    prof=$($kctl lsprofiles | grep "First Last" | awk '{print $2}')
+
+    if ! assert $kctl setkey $prof 99; then
+        return 1
+    fi
+    if ! assert "$kctl lsprofiles | grep -q '99.*First Last'"; then
+        return 1
+    fi
+    return 0
+}
+
+# disownkey, lsprofiles
+disownkey() {
+    local prof
+
+    prof=$($kctl lsprofiles | grep "First Last" | awk '{print $2}')
+
+    if ! assert $kctl disownkey $prof; then
+        return 1
+    fi
+    if ! assert "$kctl lsprofiles | grep -q 'No key.*First Last'"; then
+        return 1
+    fi
+    return 0
+}
+
+# rmlogin, lslogin
+rmlogin() {
+    if ! assert $kctl rmlogin first; then
+        return 1
+    fi
+    if ! nassert "$kctl lslogin | grep -q 'first.*last'"; then
+        return 1
+    fi
+    return 0
+}
+
+# rmemail, lsprofiles, lsemail
+rmemail() {
+    local prof
+
+    prof=$($kctl lsprofiles | grep "First Last")
+    if ! assert $kctl rmemail $prof test@blarg; then
+        return 1
+    fi
+    if ! assert $kctl rmemail $prof test@blarg2; then
+        return 1
+    fi
+    if ! nassert "$kctl lsemail | grep -q 'test@blarg.'"; then
+        return 1
+    fi
+    return 0
+}
+
+# rmprofile, lsprofiles
+rmprofile() {
+    local prof org
+
+    org=$($kctl lsorg | grep test.organization | head -1 | awk '{print $1}')
+    $kctl adduser $org "First2" "Last2" >/dev/null
+    prof=$($kctl lsprofiles | grep "First2 Last2" | awk '{print $2}')
+    
+    if ! assert $kctl rmprofile $prof; then
+        return 1
+    fi
+    if ! nassert "$kctl lsprofiles | grep -q 'First2 Last2'"; then
+        return 1
+    fi
+    return 0
+}
+
+# purgeorg, lsorg
+purgeorg() {
+    local org
+
+    org=$($kctl lsorg | grep test.organization | head -1 | awk '{print $1}')
+
+    if ! assert $kctl purgeorg $org; then
+        return 1
+    fi
+    if ! nassert "$kctl lsorg | grep -q test.organization"; then
+        return 1
+    fi
+    return 0
+}
+
+# genkeys
+genkeys() {
+    rm /tmp/kctl_test*key >/dev/null 2>&1
+
+    if ! assert $kctl genkeys sig 12 /tmp/kctl_test "Blorg"; then
+        return 1
+    fi
+    if ! assert test -e /tmp/kctl_test.sig.pkey; then
+        return 1
+    fi
+    if ! assert test -e /tmp/kctl_test.sig.skey; then
+        return 1
+    fi
+    if ! assert "grep -q 'SIGNATURE PUBLIC KEY' /tmp/kctl_test.sig.pkey"; then
+        return 1
+    fi
+    if ! assert "grep -q 'SIGNATURE PRIVATE KEY' /tmp/kctl_test.sig.skey"; then
+        return 1
+    fi
+    if ! nassert test -e /tmp/kctl_test.enc.skey; then
+        return 1
+    fi
+    if ! nassert test -e /tmp/kctl_test.enc.pkey; then
+        return 1
+    fi
+    
+    if ! assert $kctl genkeys enc 12 /tmp/kctl_test "Blarg"; then
+        return 1
+    fi    
+    if ! assert test -e /tmp/kctl_test.enc.pkey; then
+        return 1
+    fi
+    if ! assert test -e /tmp/kctl_test.enc.skey; then
+        return 1
+    fi
+    if ! assert "grep -q 'ENCRYPTION PUBLIC KEY' /tmp/kctl_test.enc.pkey"; then
+        return 1
+    fi
+    if ! assert "grep -q 'ENCRYPTION PRIVATE KEY' /tmp/kctl_test.enc.skey"; then
+        return 1
+    fi
+
+    return 0
+}
+
+# importkey, lskeys
+importkeys() {
+    if ! assert $kctl importkey /tmp/kctl_test.sig.pkey; then
+        return 1
+    fi
+    if ! assert $kctl lskeys "Blorg"; then
+        return 1
+    fi
+
+    return 0
+}
+
+# rmkeys, lskeys
+rmkeys() {
+    if ! assert $kctl rmkeys 12; then
+        return 1
+    fi
+    if ! assert $kctl lskeys "Blorg"; then
+        return 1
+    fi
+
+    return 0
+}
+
+# exportkey, lskeys 
+exportkey() {
+    $kctl importkey /tmp/kctl_test.sig.pkey > /dev/null
+    
+    if ! assert $kctl exportkey 12 sig_pkey /tmp/export_key_kctl_test.sig.pkey > /dev/null; then
+        return 1
+    fi
+    if ! assert test -e /tmp/export_key_kctl_test.sig.pkey; then
+        return 1
+    fi
+
+    return 0
+}
+
+# keysetid, keysetname
+keyset() {
+    $kctl keysetid /tmp/kctl_test.sig.pkey 13 /tmp/keysetid_kctl_test.sig.pkey > /dev/null
+    
+    id=$(cat /tmp/keysetid_kctl_test.sig.pkey | head -2 | tail -1)
+    if ! assert "cat /tmp/keysetid_kctl_test.sig.pkey | head -2 | tail -1 | grep 13"; then
+        return 1
+    fi
+
+    $kctl keysetname /tmp/kctl_test.sig.pkey "New Blorg" /tmp/keysetname_kctl_test.sig.pkey > /dev/null
+    if ! assert "cat /tmp/keysetname_kctl_test.sig.pkey | head -3 | tail -1 | grep 'New Blorg'"; then
+        return 1
+    fi
+
+    return 0
+}
+
+# exportkeys, genkeys
+exportkeys() {
+    $kctl importkey /tmp/kctl_test.sig.skey > /dev/null
+    $kctl importkey /tmp/kctl_test.sig.pkey > /dev/null
+
+    if ! assert $kctl exportkeys 12 /tmp/exportkeys_kctl_test; then
+        return 1;
+    fi
+
+    return 0
+}
+
+utest() {
+    if ! $1; then
+        echo "$1 FAILED"
+        test_failed=$((test_failed + 1))
+    else
+        test_succ=$((test_succ + 1))
+    fi
+    test_count=$((test_count + 1))
+}
+
+setup
+utest addorg
+utest setorgforwardto
+utest setorgstatus
+utest rmorg
+utest adduser
+utest addpemail
+utest addemail
+utest addlogin
+utest setkey
+utest disownkey
+utest rmlogin
+utest rmprofile
+utest purgeorg
+utest genkeys
+utest importkeys
+utest rmkeys
+utest exportkey
+utest keyset
+utest exportkeys
+
+echo "$test_succ / $test_count tests succeeded."
