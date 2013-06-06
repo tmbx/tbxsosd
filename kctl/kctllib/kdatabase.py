@@ -49,8 +49,7 @@ def db_init(db_port = None):
 			dbs_info["port"] = db_port
 	except:
 		debug("Trying to read tbxsosd configuration.")		
-		#config = KTbxsosdConfig(source_file = "/etc/teambox/tbxsosd/tbxsosd.conf")
-		config = KTbxsosdConfig(source_file = "/home/neumann/Work/Teambox/tbxsosd/config/tbxsosd.conf")
+		config = KTbxsosdConfig(source_file = os.path.join(CONF_DIR, "tbxsosd.conf"))
 		# This tells if kctl should try to login with the current username.
 		kctl_curr_creds = config.get("kctl.curr_creds")
 		dbs_info["name"] = config.get("db.name")

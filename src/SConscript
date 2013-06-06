@@ -14,12 +14,7 @@
 # limitations under the License.
 
 import os
-Import('libdb')
-Import('libfilters')
-Import('libutils')
-Import('libcomm')
-Import('env')
-Import('conf_options')
+Import('libdb libfilters libutils libcomm env conf_options prefix bindir')
 
 tbxsosd_FILES = [
     'child.c',
@@ -109,10 +104,15 @@ env.AlwaysBuild(env.Command('#common/config.h', '#common/config.h.in', config_h_
 prog_tbxsosd = env.Program('tbxsosd',
                            tbxsosd_OBJS + libdb + libfilters + libutils + libcomm,
                            LIBS = env['LIBS'] + env['tbxsosd_LIBS'])
-prog_kctl = env.Program('kctlbin',
-                        kctl_OBJS + libdb + libcomm + libutils)
+prog_kctlbin = env.Program('kctlbin',
+                           kctl_OBJS + libdb + libcomm + libutils)
 prog_tbxsosdcfg = env.Program('tbxsosdcfg', 
                               tbxsosdcfg_OBJS + libutils + libdb,
                               LIBS = env['LIBS'] + env['tbxsosd_LIBS'])
 
-Return("prog_tbxsosd prog_kctl prog_tbxsosdcfg")
+if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):   
+    # No install required in local directory.
+    if bindir != '.':
+        env.Install(bindir, prog_tbxsosd)
+        env.Install(bindir, prog_kctlbin)
+        env.Install(bindir, prog_tbxsosdcfg)

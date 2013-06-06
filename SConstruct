@@ -195,6 +195,16 @@ if str(env['build_type']) == 'keyserver':
 
 bc = conf_options['build_conf']
 
+# Check the paths.
+if env['single_dir']:
+    prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])
+    confdir = prefix
+    bindir  = prefix
+else:
+    prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])
+    confdir = str(env['DESTDIR']) + '/' + str(env['CONFDIR'])
+    bindir  = str(env['DESTDIR']) + '/' + str(env['BINDIR'])
+
 #
 # Target linking.
 #
@@ -221,29 +231,17 @@ libcomm = SConscript('libcomm/SConscript',
                      src_dir = 'libcomm',
                      duplicate = 0)
 
+SConscript('kctl/SConscript',
+           exports = 'env conf_options prefix bindir confdir',
+           src_dir = 'kctl',
+           duplicate = 0)
+
 # Main source
-(prog_tbxsosd, prog_kctl, prog_tbxsosdcfg) = SConscript('src/SConscript',
-           exports = 'env conf_options libfilters libutils libdb libcomm',
+SConscript('src/SConscript',
+           exports = 'env conf_options prefix bindir confdir libfilters libutils libdb libcomm',
            variant_dir = 'build/src',
            src_dir = 'src',
            duplicate = 0)
-                                
-# Check the paths.
-if env['single_dir']:
-    prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])
-    confdir = prefix
-    bindir  = prefix
-else:
-    prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])
-    confdir = str(env['DESTDIR']) + '/' + str(env['CONFDIR'])
-    bindir  = str(env['DESTDIR']) + '/' + str(env['BINDIR'])
-
-if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):   
-    # No install required in local directory.
-    if bindir != '.':
-        env.Install(bindir, prog_tbxsosd)
-        env.Install(bindir, prog_kctl)
-        env.Install(bindir, prog_tbxsosdcfg)
         
 env.Alias('install', bindir)
-       
+

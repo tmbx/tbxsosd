@@ -1,1 +1,2 @@
-CONF_DIR="@@CONF_DIR@@"
+CONF_DIR = "%(config_path)s"
+
