@@ -36,7 +36,8 @@ opts.AddVariables(
     ("DESTDIR", 'Root of installation', '/'),
     ('PREFIX', 'Architecture-independant files prefix', '/usr'),
     ('CONFDIR', 'Configuration file path', '/etc'),
-    ('BINDIR', 'Executable path', '/usr/bin'))
+    ('BINDIR', 'Executable path', '/usr/bin'),
+    ('PYTHONDIR', 'Path to Python libraries.', '/usr/share/python'))
 
 #
 # Environment setup.
@@ -200,11 +201,12 @@ if env['single_dir']:
     prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
     confdir = prefix
     bindir  = prefix
+    pydir = prefix
 else:
     prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
     confdir = os.path.join(prefix, str(env['CONFDIR']))
     bindir  = os.path.join(prefix, str(env['BINDIR']))
-
+    pydir = os.path.join(prefix, str(env['PYTHONDIR']))
 #
 # Target linking.
 #
@@ -232,7 +234,7 @@ libcomm = SConscript('libcomm/SConscript',
                      duplicate = 0)
 
 SConscript('kctl/SConscript',
-           exports = 'env conf_options prefix bindir confdir',
+           exports = 'env conf_options prefix bindir confdir pydir',
            src_dir = 'kctl',
            duplicate = 0)
 

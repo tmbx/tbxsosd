@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import os
-Import('env conf_options prefix bindir confdir')
+Import('env conf_options prefix bindir confdir pydir')
 
 def template_build(target, source, env):
     for a_target, a_source in zip(target, source):
@@ -24,8 +24,8 @@ def template_build(target, source, env):
         sourceFile.close()
         targetFile.close()
 
-pyDir = os.path.join(str(env['PREFIX']), "share")
-conf_options['pyDir'] = pyDir
+# Passed to the kctl.sh template.
+conf_options['pydir'] = pydir
 
 library_files = [
     'kctllib/__init__.py',
@@ -55,11 +55,11 @@ env.AlwaysBuild(env.Command('kctl', 'kctl.sh.in',
 
 kctl_sh = File("kctl")
 kctl_prog = File("kctl.py")
-kctlcmd_lib = env.Dir(os.path.join(pyDir, "kctlcmd"))
-kctllib_lib = env.Dir(os.path.join(pyDir, "kctllib"))
+kctlcmd_lib = env.Dir(os.path.join(pydir, "kctlcmd"))
+kctllib_lib = env.Dir(os.path.join(pydir, "kctllib"))
 
 if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
-    env.Install(pyDir, kctl_prog)
+    env.Install(pydir, kctl_prog)
     env.Install(bindir, kctl_sh)
 
     for s in command_files:
@@ -68,4 +68,4 @@ if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
     for s in library_files:
         env.Install(kctlcmd_lib, s)
 
-env.Alias('install', pyDir)
+env.Alias('install', pydir)
