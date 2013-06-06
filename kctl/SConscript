@@ -16,7 +16,16 @@
 import os
 Import('env conf_options prefix bindir confdir')
 
-pyKctlDir = os.path.join(str(env['DESTDIR']), "share", "python-support")
+def template_build(target, source, env):
+    for a_target, a_source in zip(target, source):
+        targetFile = file(str(a_target), "w")
+        sourceFile = file(str(a_source), "r")
+        targetFile.write(sourceFile.read() % conf_options)
+        sourceFile.close()
+        targetFile.close()
+
+pyDir = os.path.join(str(env['DESTDIR']), "share")
+conf_options['pyDir'] = pyDir
 
 library_files = [
     'kctllib/__init__.py',
@@ -38,26 +47,20 @@ command_files = [
     'kctlcmd/org_cmd.py',
     'kctlcmd/prof_cmd.py']
     
-kctl_prog = File("#kctl/kctl")
-
-kctlcmd_lib = env.Dir(os.path.join(pyKctlDir, "kctlcmd"))
-kctllib_lib = env.Dir(os.path.join(pyKctlDir, "kctllib"))
-
-def kconfig_py_build(target, source, env):
-    kconfig_py_defines = conf_options
-    for a_target, a_source in zip(target, source):
-        kconfig_py = file(str(a_target), "w")
-        kconfig_py_in = file(str(a_source), "r")
-        kconfig_py.write(kconfig_py_in.read() % kconfig_py_defines)
-        kconfig_py_in.close()
-        kconfig_py.close()
-
 env.AlwaysBuild(env.Command('kctllib/kconfig.py', 
                             'kctllib/kconfig.py.in', 
-                            kconfig_py_build))
+                            template_build))
+env.AlwaysBuild(env.Command('kctl', 'kctl.sh.in', 
+                            [template_build, Chmod("$TARGET", 0755)]))
 
-if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):   
-    env.Install(bindir, kctl_prog)
+kctl_sh = File("kctl")
+kctl_prog = File("kctl.py")
+kctlcmd_lib = env.Dir(os.path.join(pyDir, "kctlcmd"))
+kctllib_lib = env.Dir(os.path.join(pyDir, "kctllib"))
+
+if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
+    env.Install(pyDir, kctl_prog)
+    env.Install(bindir, kctl_sh)
 
     for s in command_files:
         env.Install(kctllib_lib, s)
@@ -65,4 +68,4 @@ if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
     for s in library_files:
         env.Install(kctlcmd_lib, s)
 
-env.Alias('install', pyKctlDir)
+env.Alias('install', pyDir)
