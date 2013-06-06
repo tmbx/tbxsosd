@@ -24,7 +24,7 @@ def template_build(target, source, env):
         sourceFile.close()
         targetFile.close()
 
-pyDir = os.path.join(str(env['DESTDIR']), "share")
+pyDir = os.path.join(str(env['PREFIX']), "share")
 conf_options['pyDir'] = pyDir
 
 library_files = [

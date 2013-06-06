@@ -197,13 +197,13 @@ bc = conf_options['build_conf']
 
 # Check the paths.
 if env['single_dir']:
-    prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])
+    prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
     confdir = prefix
     bindir  = prefix
 else:
-    prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])
-    confdir = str(env['DESTDIR']) + '/' + str(env['CONFDIR'])
-    bindir  = str(env['DESTDIR']) + '/' + str(env['BINDIR'])
+    prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
+    confdir = os.path.join(prefix, str(env['CONFDIR']))
+    bindir  = os.path.join(prefix, str(env['BINDIR']))
 
 #
 # Target linking.
