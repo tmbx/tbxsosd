@@ -18,13 +18,14 @@
  */
 
 #include <kerror.h>
-#include <sendmail.h>
 
-#include "db.h"
-#include "common.h"
+#include "common/common.h"
+#include "common/logid.h"
+
+#include "libutils/sendmail.h"
+#include "libdb/db.h"
+
 #include "filters.h"
-#include "sendmail.h"
-#include "logid.h"
 
 int kdfilter_forward_open(kdfilter *filter, void **data) {
     filter = filter;

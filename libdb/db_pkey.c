@@ -22,9 +22,9 @@
 #include <apr_strings.h>
 #include <kerror.h>
 
-#include "common_keys.h"
+#include "common/common_keys.h"
+#include "common/logid.h"
 
-#include "logid.h"
 #include "db_psql.h"
 #include "db_pkey.h"
 

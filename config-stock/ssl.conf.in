@@ -1,0 +1,39 @@
+# SSL 
+#
+# In the wake of DSA-1571, Laurent Birtz and I decided on a way to
+# support certificate changes on online services.  As of May 2008 KMOD
+# will send a plain uint32 prior to the SSL connexion.  This is the
+# number of the certificate he will be communicating with.  This is to
+# be matched with that list of certificates and keys.  The server will
+# load the certificate matching the one demanded by KMOD if he has it
+# in his list.  We can then remove the certificate from the list when
+# we want to revoke a certificate.
+#
+# As an added bonus for compatibility, I've made the server capable of
+# accepting traditionnal SSL connection by using a default certificate
+# when KMOD doesn't identify which one to use.  This keeps us
+# compatible with pre-DSA-1571 version of the server.
+#
+# KPSes should not enforce a default certificate.  Other Teambox
+# services using tbxsosd should.
+
+ssl.keys = "1:@@PREFIX@@/etc/tbxsosd/ssl/active.key";
+ssl.certs = "1:@@PREFIX@@/etc/tbxsosd/ssl/active.crt";
+
+# NOTE: This is not a boolean.  This is the number of the certificate
+# we have to use as default certificate for connexion that do not
+# identify which certificate they want to use.
+ssl.fallback_cert = "1";
+
+# String selecting the mode of authentication to be used. 
+#
+# client: Send the certificate the client demands.  This will make tbxsosd
+#         refuse connection from client not sending certificate identification
+#         upon connection.
+# fallback: Send the certificate the client demands if he demands one,
+#           otherwise fallback to the default configured certificate. 
+#           Implies allowing connection from client not sending certificate
+#           identification on server connect.
+# none: Always send the default configured certificate.
+ssl.authentication_mode = "none";
+

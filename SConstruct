@@ -19,48 +19,16 @@ import commands, os, sys, glob, re
 # Per Laurent Birtz example.
 SConsignFile("/tmp/tbxsosd.sconsign.dblite")
 EnsurePythonVersion(2,3)
-SourceSignatures('MD5')
-TargetSignatures('content')
 
-shared_FILES = ['license.c',
-                'keys.c',
-                'shared.c']
-
-kctl_FILES = ['kctl.c']
-
-tbxsosdcfg_FILES = ['tbxsosdcfg.c']
-
-tbxsosd_FILES = ['client.c',
-                   'child.c',
-                   'childset.c',
-                   'dpkg.c',
-                   'main.c',
-                   'otut.c',
-                   'package.c',
-                   'podder.c',
-                   'server.c',
-                   'packet.c',
-                   'proto.c',
-                   'proto_defs.c',
-                   'proto_funcs.c',
-                   'signals.c',
-                   'client_req_pkg.c',
-                   'client_req_login.c',
-                   'client_req_dpkg.c',
-                   'client_req_key.c',
-		   'client_req_kws.c',
-                   'client_req_otut.c',
-                   'client_req_misc.c']
-
-opts = Options('build.conf')
-opts.AddOptions(
-    ListOption('build_type', 'Server build configuration', 'full',
+opts = Variables('build.conf')
+opts.AddVariables(
+    ListVariable('build_type', 'Server build configuration', 'full',
                ['tbxsos', 'eks', 'iks', 'full', 'kos', 'keyserver']),
-    BoolOption('mudflap', 'Build with mudflap (gcc 4.x)', 0),
-    BoolOption('mpatrol', 'Build with mpatrol', 0),
-    BoolOption('debug', 'Compile with all debug options turned on', 1),
-    BoolOption('db_debug', 'Compile with database debug option', 1),
-    BoolOption('single_dir', 'Install everything in the same directory', 0),
+    BoolVariable('mudflap', 'Build with mudflap (gcc 4.x)', 0),
+    BoolVariable('mpatrol', 'Build with mpatrol', 0),
+    BoolVariable('debug', 'Compile with all debug options turned on', 1),
+    BoolVariable('db_debug', 'Compile with database debug option', 1),
+    BoolVariable('single_dir', 'Install everything in the same directory', 0),
     ('libktools_include', 'Location of include files for libktools', '#../libktools/src'),
     ('libktools_libpath', 'Location of library files for libktools', '#../libktools/build'),
     ('tagcrypt_include', 'Location of include files for tagcrypt', '#../tagcrypt'),
@@ -68,7 +36,8 @@ opts.AddOptions(
     ("DESTDIR", 'Root of installation', '/'),
     ('PREFIX', 'Architecture-independant files prefix', '/usr'),
     ('CONFDIR', 'Configuration file path', '/etc'),
-    ('BINDIR', 'Executable path', '/usr/bin'))
+    ('BINDIR', 'Executable path', '/usr/bin'),
+    ('PYTHONDIR', 'Path to Python libraries.', '/usr/share/python'))
 
 #
 # Environment setup.
@@ -111,7 +80,7 @@ else:
 def CheckGCrypt(context):
     context.Message("Checking for libgcrypt...")
     if commands.getstatusoutput('which libgcrypt-config')[0] == 0:
-        env['LIBS'] += commands.getoutput('libgcrypt-config --libs').strip().split()
+        env['LINKFLAGS'] += commands.getoutput('libgcrypt-config --libs').strip().split()
         context.Result('ok')
         return 1
     else:
@@ -227,116 +196,54 @@ if str(env['build_type']) == 'keyserver':
 
 bc = conf_options['build_conf']
 
+# Check the paths.
+if env['single_dir']:
+    prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
+    confdir = prefix
+    bindir  = prefix
+    pydir = prefix
+else:
+    prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
+    confdir = os.path.join(prefix, str(env['CONFDIR']))
+    bindir  = os.path.join(prefix, str(env['BINDIR']))
+    pydir = os.path.join(prefix, str(env['PYTHONDIR']))
 #
 # Target linking.
 #
 
-# Setup the correct config file path.  If the single_dir option is set
-# to yes, set the config file path variable to the name of the config
-# file
-conf_options['config_path'] = str(env['CONFDIR'])
-
-def config_h_build(target, source, env):
-    config_h_defines = conf_options
-  
-    for a_target, a_source in zip(target, source):
-        config_h = file(str(a_target), "w")
-        config_h_in = file(str(a_source), "r")
-        config_h.write(config_h_in.read() % config_h_defines)
-        config_h_in.close()
-        config_h.close()
-
-def kctl_link(target, source, env):
-    for a_target, a_source in zip(target, source):
-        if not os.path.exists(str(a_target)):
-            os.symlink(str(a_source), str(a_target))
-
-shared_OBJS = []
-tbxsosd_OBJS = []
-tbxsosdcfg_OBJS = []
-kctl_OBJS = []
-
-for s in shared_FILES:
-    n = os.path.splitext(s)[0]
-    cpp_path = env['CPPPATH'] + ['common', 'libutils', 'libdb', 'libfilters', 'libcomm']
-    o = env.Object(target = 'build/' + n, source = s, CPPPATH = cpp_path)
-    shared_OBJS.append(o);
-
-for s in tbxsosdcfg_FILES:
-    n = os.path.splitext(s)[0]
-    cpp_path = env['CPPPATH'] + ['common', 'libutils', 'libdb', 'libfilters', 'libcomm']
-    o = env.Object(target = 'build/' + n, source = s, CPPPATH = cpp_path)
-    tbxsosdcfg_OBJS.append(o)
-
-for s in tbxsosd_FILES:
-    n = os.path.splitext(s)[0]
-    cpp_path = env['CPPPATH'] + ['common', 'libutils', 'libdb', 'libfilters', 'libcomm']
-    o = env.Object(target = 'build/' + n, source = s, CPPPATH = cpp_path)
-    tbxsosd_OBJS.append(o)
-
-for s in kctl_FILES:
-    n = os.path.splitext(s)[0]
-    cpp_path = env['CPPPATH'] + ['common', 'libutils', 'libdb', 'libfilters', 'libcomm']
-    o = env.Object(target = 'build/' + n, source = s, CPPPATH = cpp_path)
-    kctl_OBJS.append(o)
-
-tbxsosd_OBJS += shared_OBJS
-kctl_OBJS += shared_OBJS
-tbxsosdcfg_OBJS += shared_OBJS
-
-# Add the configuration file targets
-env.AlwaysBuild(env.Command('common/config.h', 'common/config.h.in', config_h_build))
-
-# Build the support libraries.
+# Support libraries.
 libfilters = SConscript('libfilters/SConscript',
                         exports = 'env',
-                        build_dir = 'build/libfilters',
+                        variant_dir = 'build/libfilters',
                         src_dir = 'libfilters',
                         duplicate = 0)
 libutils = SConscript('libutils/SConscript',
                       exports = 'env',
-                      build_dir = 'build/libutils',
+                      variant_dir = 'build/libutils',
                       src_dir = 'libutils',
                       duplicate = 0)
 libdb = SConscript('libdb/SConscript',
                    exports = 'env',
-                   build_dir = 'build/libdb',
+                   variant_dir = 'build/libdb',
                    src_dir = 'libdb',
                    duplicate = 0)
 libcomm = SConscript('libcomm/SConscript',
                      exports = 'env',
-                     build_dir = 'build/libcomm',
+                     variant_dir = 'build/libcomm',
                      src_dir = 'libcomm',
                      duplicate = 0)
-                                
-# Build the programs.
-prog_tbxsosd = env.Program('tbxsosd',
-                             tbxsosd_OBJS + libdb + libfilters + libutils + libcomm,
-                             LIBS = env['LIBS'] + env['tbxsosd_LIBS'])
-prog_kctl = env.Program('kctlbin',
-                        kctl_OBJS + libdb + libcomm + libutils)
 
-prog_tbxsosdcfg = env.Program('tbxsosdcfg', 
-                                tbxsosdcfg_OBJS + libutils + libdb,
-                                LIBS = env['LIBS'] + env['tbxsosd_LIBS'])
+SConscript('kctl/SConscript',
+           exports = 'env conf_options prefix bindir confdir pydir',
+           src_dir = 'kctl',
+           duplicate = 0)
 
-# Check the paths.
-if env['single_dir']:
-    prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])
-    confdir = prefix
-    bindir  = prefix
-else:
-    prefix  = str(env['DESTDIR']) + '/' + str(env['PREFIX'])
-    confdir = str(env['DESTDIR']) + '/' + str(env['CONFDIR'])
-    bindir  = str(env['DESTDIR']) + '/' + str(env['BINDIR'])
-
-if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):   
-    # No install required in local directory.
-    if bindir != '.':
-        env.Install(bindir, prog_tbxsosd)
-        env.Install(bindir, prog_kctl)
-        env.Install(bindir, prog_tbxsosdcfg)
+# Main source
+SConscript('src/SConscript',
+           exports = 'env conf_options prefix bindir confdir libfilters libutils libdb libcomm',
+           variant_dir = 'build/src',
+           src_dir = 'src',
+           duplicate = 0)
         
 env.Alias('install', bindir)
-env.Alias('install', confdir)
-       
+

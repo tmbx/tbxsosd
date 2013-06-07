@@ -29,10 +29,11 @@
 #include <kerror.h>
 #include <unistd.h>
 
-#include "options.h"
-#include "logid.h"
+#include "common/logid.h"
+#include "libutils/options.h"
+#include "libutils/logging.h"
+
 #include "db_psql.h"
-#include "logging.h"
 
 struct kdsql_conn_link {
     kdsql *db;
@@ -81,7 +82,7 @@ char *kdsql_uint64_param(int n, uint64_t val) {
     assert(n < 9);
 
     /* Prepare the parameter */
-    sprintf(params[n], "%llu", val);
+    sprintf(params[n], PRINTF_64"u", val);
     return params[n];
 }
 

@@ -39,9 +39,9 @@
 #include <kerror.h>
 #include <kmem.h>
 
-#include "conf.h"
-#include "logid.h"
-#include "logging.h"
+#include "common/logid.h"
+#include "libutils/conf.h"
+#include "libutils/logging.h"
 
 struct config_lexer_value {
     char *section;

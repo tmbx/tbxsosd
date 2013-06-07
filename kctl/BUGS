@@ -1,0 +1,5 @@
+
+- sometimes, we get two or three times the "error" word for the same error (stored procedure, sql, application)
+- supports quoting (in cli mode) with quotes and double-quotes but not escaping (\" ...) (should not be a problem)
+- should not raise in production mode
+

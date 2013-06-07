@@ -27,14 +27,15 @@
 #include <stdio.h>
 #include <kerror.h>
 
-#include "common_pkg.h"
-#include "common.h"
+#include "common/common_pkg.h"
+#include "common/common.h"
+#include "common/logid.h"
 
-#include "options.h"
-#include "logid.h"
-#include "logging.h"
-#include "gen_comm.h"
-#include "sock_comm.h"
+#include "libutils/options.h"
+#include "libutils/logging.h"
+#include "libcomm/gen_comm.h"
+#include "libcomm/sock_comm.h"
+
 #include "filter_virus.h"
 
 #if defined(REQUEST_PACKAGE) || defined(REQUEST_PACKAGE_LICENSE)

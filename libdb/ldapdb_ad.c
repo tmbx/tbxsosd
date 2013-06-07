@@ -20,12 +20,13 @@
 #include <kerror.h>
 #include <stdlib.h>
 
-#include "options.h"
-#include "logid.h"
-#include "logging.h"
+#include "common/logid.h"
+#include "libutils/logging.h"
+#include "libutils/options.h"
+#include "libutils/utils.h"
+
 #include "ldapdb.h"
 #include "ldapdb_base.h"
-#include "utils.h"
 
 /* The following attributes are part of the partial attributes set (PAS) by
  * default:

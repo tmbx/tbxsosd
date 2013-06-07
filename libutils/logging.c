@@ -31,7 +31,7 @@
 #if 0
 #include "shared.h"
 #endif
-#include "utils.h"
+#include "libutils/utils.h"
 #include "logging.h"
 
 logger *_logger_instance = NULL;
@@ -67,7 +67,7 @@ static void syslog_log(int log_level, const char *log_id, const char *msg) {
 #if 0
     uint64_t s = kdsh_get_session_counter();
     if (s != 0)
-        syslog(log_level, "[S: %llu] %s -- %s", s, log_id, msg);
+        syslog(log_level, "[S: "PRINTF_64"u] %s -- %s", s, log_id, msg);
     else
 #endif
         syslog(log_level, "%s -- %s", log_id, msg);
@@ -97,7 +97,7 @@ static void stderr_log(int log_level, const char * log_id, const char * msg) {
 #if 0
     uint64_t s = kdsh_get_session_counter();
     if (s != 0)
-        fprintf(stderr, "[%s, S: %llu] %s -- %s\n", level_str, s, log_id, msg);    
+        fprintf(stderr, "[%s, S: "PRINTF_64"u] %s -- %s\n", level_str, s, log_id, msg);    
     else
 #endif
         fprintf(stderr, "[%s] %s -- %s\n", level_str, log_id, msg);

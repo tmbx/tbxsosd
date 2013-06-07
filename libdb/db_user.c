@@ -24,8 +24,9 @@
 #include <stdlib.h>
 #include <kerror.h>
 
-#include "common.h"
-#include "logid.h"
+#include "common/common.h"
+#include "common/logid.h"
+
 #include "db_psql.h"
 #include "db_user.h"
 
@@ -312,7 +313,7 @@ int kddbuser_get_key_id(kddbuser *self, uint64_t prof_id, uint64_t *key_id) {
         res = PQgetvalue(db_res, 0, 0);
 
         if (key_id != NULL) {
-            if (sscanf(res, "%llu", key_id) < 1) {
+            if (sscanf(res, PRINTF_64"u", key_id) < 1) {
                 KERROR_SET(_db_, 0, "incorrect key ID value: %s", key_id);
                 break;
             }
@@ -514,21 +515,21 @@ int kddbuser_search_ldap_group(kddbuser *self,
 	}
 
         if (key_id != NULL) {
-            if (sscanf(key_id_text, "%llu", key_id) < 1) {
+            if (sscanf(key_id_text, PRINTF_64"u", key_id) < 1) {
                 KERROR_SET(_db_, 0, "incorrect key ID value: %s", key_id_text);
                 break;
             }
         }
 
         if (org_id != NULL) {
-            if (sscanf(org_id_text, "%llu", org_id) < 1) {
+            if (sscanf(org_id_text, PRINTF_64"u", org_id) < 1) {
                 KERROR_SET(_db_, 0, "incorrect org ID value: %s", org_id_text);
                 break;
             }
         }
 
         if (prof_id != NULL) {
-            if (sscanf(prof_id_text, "%llu", prof_id) < 1) {
+            if (sscanf(prof_id_text, PRINTF_64"u", prof_id) < 1) {
                 KERROR_SET(_db_, 0, "incorrect profile ID value: %s", prof_id_text);
                 break;
             }
@@ -579,7 +580,7 @@ int kddbuser_get_org_data_from_kdn(kddbuser *self,
 
         if (org_data != NULL) {
             org_id_text = PQgetvalue(db_res, 0, 0);
-            if (sscanf(org_id_text, "%llu", &org_data->org_id) < 1) {
+            if (sscanf(org_id_text, PRINTF_64"u", &org_data->org_id) < 1) {
                 KERROR_SET(_db_, 0, "invalid value for organization ID: %s", org_id_text);
                 break;
             }
@@ -637,7 +638,7 @@ int kddbuser_get_org_data_from_prof_id(kddbuser *self,
 
         if (org_data != NULL) {
             org_id_text = PQgetvalue(db_res, 0, 0);
-            if (sscanf(org_id_text, "%llu", &org_data->org_id) < 1) {
+            if (sscanf(org_id_text, PRINTF_64"u", &org_data->org_id) < 1) {
                 KERROR_SET(_db_, 0, "invalid value for organization ID: %s", org_id_text);
                 break;
             }
@@ -759,14 +760,14 @@ int kddbuser_search_email(kddbuser *self,
 	}
 
         if (key_id != NULL) {
-            if (sscanf(key_id_text, "%llu", key_id) < 1) {
+            if (sscanf(key_id_text, PRINTF_64"u", key_id) < 1) {
                 KERROR_SET(_db_, 0, "invalid value for key ID: %s", key_id);
                 break;
             }
         }
 
         if (prof_id != NULL) {
-            if (sscanf(prof_id_text, "%llu", prof_id) < 1) {
+            if (sscanf(prof_id_text, PRINTF_64"u", prof_id) < 1) {
                 KERROR_SET(_db_, 0, "invalid value for profile ID: %s", prof_id);
                 break;
             }

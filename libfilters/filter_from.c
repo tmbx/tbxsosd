@@ -21,9 +21,11 @@
 
 #include <kerror.h>
 
-#include "db.h"
-#include "common.h"
-#include "logid.h"
+#include "common/common.h"
+#include "common/logid.h"
+
+#include "libdb/db.h"
+
 #include "filters.h"
 
 #if defined(REQUEST_PACKAGE) || defined(REQUEST_PACKAGE_LICENSE)

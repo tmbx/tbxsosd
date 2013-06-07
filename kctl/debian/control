@@ -1,0 +1,27 @@
+Source: kctl
+Section: teambox-internal
+Priority: optional
+Maintainer:
+Build-Depends: debhelper (>= 5), python-support
+Standards-Version: 3.7.2
+XS-Python-Version: all
+
+Package: kctl
+Architecture: all
+Depends: ${python:Depends}, kctlbin, kctllib
+XB-Python-Version: ${python:Versions}
+Description: Low-level Teambox database controller
+ Allow low-level manipulations of the database on the Teambox KPS.
+ .
+ This includes a readline client.
+
+Package: kctllib
+Architecture: all
+Provides: kctllib
+Depends: ${python:Depends}, kpython
+XB-Python-Version: ${python:Versions}
+Description: Common utility library for KCTL
+ Allows low-level manipulations of the database on the Teambox KPS.
+ .
+ This is just a Python library including the database interface used by
+ kctl and the KPS XML/RPC API.

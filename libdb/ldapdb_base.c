@@ -25,14 +25,15 @@
 #include <ktools.h>
 #include <math.h>
 
-#include "logid.h"
-#include "logging.h"
+#include "common/logid.h"
+#include "libutils/logging.h"
+#include "libutils/options.h"
+#include "libutils/utils.h"
+
 #include "ldapdb.h"
 #include "ldapdb_base.h"
 #include "ldapdb_utils.h"
 #include "ldapdb_servers.h"
-#include "options.h"
-#include "utils.h"
 
 /** Allocate a new LDAP result structure. */
 struct kdldap_result *kdldap_result_new(apr_pool_t *pool) {

@@ -24,13 +24,14 @@
 #include <kerror.h>
 #include <stdlib.h>
 
-#include "logid.h"
+#include "common/logid.h"
+#include "libutils/logging.h"
+#include "libutils/utils.h"
+#include "libutils/options.h"
+
 #include "db.h"
 #include "db_psql.h"
 #include "db_login.h"
-#include "utils.h"
-#include "options.h"
-#include "logging.h"
 
 static struct db_statement db_stmts[6] = {
     {
@@ -338,7 +339,7 @@ static int kddblogin_set_results(apr_pool_t *pool, PGresult *db_res, struct kd_l
            conclusively find the profile ID in that place. */
         if (!PQgetisnull(db_res, 0, 1)) {
             s = PQgetvalue(db_res, 0, 1);
-            if (sscanf(s, "%llu", &(*res)->prof_id) < 1) {
+            if (sscanf(s, PRINTF_64"u", &(*res)->prof_id) < 1) {
                 KERROR_SET(_db_, 0, "incorrect value for profile ID: %s", s);
                 return -1;
             }

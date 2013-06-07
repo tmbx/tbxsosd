@@ -1,0 +1,69 @@
+[main]
+
+# redirect all output to syslog (daemon.log)
+#logredirect = anynonemptyvalue
+
+# debug
+#debug = anynonemptyvalue
+
+# sets the path to needed utils
+#kctl = /usr/bin/kctl
+#kctl_old = /usr/bin/kctl_old
+
+
+[databases]
+
+db_user.name = profiles_db
+db_user.username = teambox
+db_user.password = teambox
+db_user.admin_username = teambox_admin
+db_user.admin_password = 
+db_user.socket_mode = unix
+db_user.host = /var/run/postgresql
+db_user.port = 
+
+db_login.name = login_db
+db_login.username = teambox
+db_login.password = teambox
+db_login.admin_username = teambox_admin
+db_login.admin_password = 
+db_login.socket_mode = unix
+db_login.host = /var/run/postgresql
+db_login.port = 
+
+db_skey.name = privkeys_db
+db_skey.username = teambox
+db_skey.password = teambox
+db_skey.admin_username = teambox_admin
+db_skey.admin_password = 
+db_skey.socket_mode = unix
+db_skey.host = /var/run/postgresql
+db_skey.port = 
+
+db_pkey.name = pubkeys_db
+db_pkey.username = teambox
+db_pkey.password = teambox
+db_pkey.admin_username = teambox_admin
+db_pkey.admin_password = 
+db_pkey.socket_mode = unix
+db_pkey.host = /var/run/postgresql
+db_pkey.port = 
+
+db_otut.name = otut_db
+db_otut.username = teambox
+db_otut.password = teambox
+db_otot.admin_username = teambox_admin
+db_otut.admin_password = 
+db_otut.socket_mode = unix
+db_otut.host = /var/run/postgresql
+db_otut.port = 
+
+db_event.name = event_db
+db_event.username = teambox
+db_event.password = teambox
+db_event.admin_username = teambox_admin
+db_event.admin_password = 
+db_event.socket_mode = unix
+db_event.host = /var/run/postgresql
+db_event.port = 
+
