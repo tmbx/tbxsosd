@@ -22,7 +22,8 @@
 #ifndef _DB_SKEY_H
 #define _DB_SKEY_H
 
-#include "common_keys.h"
+#include "common/common_keys.h"
+
 #include "db_psql.h"
 
 struct __kddbskey {

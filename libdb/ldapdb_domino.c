@@ -19,9 +19,10 @@
 #include <assert.h>
 #include <kerror.h>
 
-#include "options.h"
-#include "logid.h"
-#include "logging.h"
+#include "libutils/options.h"
+#include "libutils/logging.h"
+#include "common/logid.h"
+
 #include "ldapdb.h"
 #include "ldapdb_base.h"
 

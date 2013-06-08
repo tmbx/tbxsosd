@@ -23,14 +23,15 @@
 #include <stdio.h>
 #include <kerror.h>
 #include <unistd.h>
-#include <utils.h>
+
+#include "libcomm/gen_comm.h"
+#include "libcomm/file_comm.h"
+#include "common/logid.h"
 
 #include "mime.h"
-#include "gen_comm.h"
-#include "file_comm.h"
-#include "logid.h"
 #include "sendmail.h"
 #include "process.h"
+#include "utils.h"
 
 int sendmail(apr_pool_t *parent_pool, struct sendmail_args *mail_args) {
     int err = -1;

@@ -25,9 +25,10 @@
 #include <ldap.h>
 #include <kerror.h>
 
-#include "logid.h"
-#include "logging.h"
-#include "options.h"
+#include "common/logid.h"
+#include "libutils/logging.h"
+#include "libutils/options.h"
+
 #include "ldapdb_servers.h"
 #include "ldapdb_utils.h"
 

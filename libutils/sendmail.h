@@ -24,7 +24,7 @@
 #include <apr_pools.h>
 #include <kstr.h>
 
-#include "common_msg.h"
+#include "common/common_msg.h"
 
 struct sendmail_args {
     const char *mail_to;

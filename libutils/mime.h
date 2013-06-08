@@ -24,7 +24,7 @@
 #include <apr_pools.h>
 #include <kbuffer.h>
 
-#include "common_msg.h"
+#include "common/common_msg.h"
 
 int message_to_mime(apr_pool_t *pool, struct message *msg, const char *nl, kbuffer *kb);
 

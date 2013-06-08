@@ -22,7 +22,7 @@
 #include <ldap.h>
 #include <kerror.h>
 
-#include "logid.h"
+#include "common/logid.h"
 #include "ldapdb_utils.h"
 
 void kdldap_paranoid_push_error(LDAP *ldap_conn, int ldap_err) {

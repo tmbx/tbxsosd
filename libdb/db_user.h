@@ -24,7 +24,8 @@
 
 #include <apr_tables.h>
 
-#include "common.h"
+#include "common/common.h"
+
 #include "db_psql.h"
 
 /** User profile database object. */

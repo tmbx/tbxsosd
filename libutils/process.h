@@ -24,9 +24,9 @@
 #include <signal.h>
 #include <kbuffer.h>
 
-#include "gen_comm.h"
-#include "file_comm.h"
-#include "poll_comm.h"
+#include "libcomm/gen_comm.h"
+#include "libcomm/file_comm.h"
+#include "libcomm/poll_comm.h"
 
 struct process_args {
     /** Timeout */

@@ -27,10 +27,11 @@
 #include <base64.h>
 #include <kerror.h>
 
+#include "common/logid.h"
+
 #include "mime.h"
 #include "utils.h"
 #include "str.h"
-#include "logid.h"
 
 struct mime {
     /** Newline character to use. */
