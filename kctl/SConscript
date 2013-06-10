@@ -55,8 +55,8 @@ env.AlwaysBuild(env.Command('kctl', 'kctl.sh.in',
 
 kctl_sh = File("kctl")
 kctl_prog = File("kctl.py")
-kctlcmd_lib = env.Dir(os.path.join(pydir, "kctlcmd"))
-kctllib_lib = env.Dir(os.path.join(pydir, "kctllib"))
+kctlcmd_lib = env.Dir(os.path.join(str(pydir), "kctlcmd"))
+kctllib_lib = env.Dir(os.path.join(str(pydir), "kctllib"))
 
 if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
     env.Install(pydir, kctl_prog)
