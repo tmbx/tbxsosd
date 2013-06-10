@@ -37,7 +37,8 @@ opts.AddVariables(
     ('PREFIX', 'Architecture-independant files prefix', '/usr'),
     ('CONFDIR', 'Configuration file path', '/etc'),
     ('BINDIR', 'Executable path', '/usr/bin'),
-    ('PYTHONDIR', 'Path to Python libraries.', '/usr/share/python'))
+    ('DBDIR', 'Where to put the SQL-PY files.', '/usr/share/teambox/db'),
+    ('PYTHONDIR', 'Path to Python libraries.', '/usr/share/teambox/python'))
 
 #
 # Environment setup.
@@ -201,11 +202,13 @@ if env['single_dir']:
     prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
     confdir = prefix
     bindir  = prefix
+    dbdir = prefix
     pydir = prefix
 else:
     prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
     confdir = os.path.join(prefix, str(env['CONFDIR']))
     bindir  = os.path.join(prefix, str(env['BINDIR']))
+    dbdir = os.path.join(prefix, str(env['DBDIR']))
     pydir = os.path.join(prefix, str(env['PYTHONDIR']))
 #
 # Target linking.
@@ -233,6 +236,10 @@ libcomm = SConscript('libcomm/SConscript',
                      src_dir = 'libcomm',
                      duplicate = 0)
 
+SConscript('db/SConscript',
+           exports = 'env dbdir',
+           duplicate = 0)
+
 SConscript('kctl/SConscript',
            exports = 'env conf_options prefix bindir confdir pydir',
            src_dir = 'kctl',
@@ -246,4 +253,5 @@ SConscript('src/SConscript',
            duplicate = 0)
         
 env.Alias('install', bindir)
-
+env.Alias('install', dbdir)
+env.Alias('install', pydir)

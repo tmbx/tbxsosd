@@ -34,7 +34,7 @@ library_files = [
     'kctllib/kexcept.py',
     'kctllib/kiniconfig.py',
     'kctllib/kkeys.py',
-    'kctllib/kparams.py',
+    'kctllib/kparams.py',    
     'kctllib/ktbxsosdconfigdaemon.py',
     'kctllib/ktbxsosdconfig.py']
 
@@ -67,5 +67,3 @@ if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
         
     for s in library_files:
         env.Install(kctlcmd_lib, s)
-
-env.Alias('install', pydir)
