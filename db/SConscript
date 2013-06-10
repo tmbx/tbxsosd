@@ -1,0 +1,26 @@
+Import('env dbdir')
+
+db_files = ['db/01-create_db.sqlpy',
+            'db/10-create_event_db.sqlpy',
+            'db/10-create_keys_db.sqlpy',
+            'db/10-create_login_db.sqlpy',
+            'db/10-create_otut_db.sqlpy',
+            'db/10-create_profiles_db.sqlpy']
+
+api_files = ['api/10-create_event_proc.sqlpy',
+             'api/20-create_grants.sqlpy',
+             'api/02-create_groups.sqlpy',
+             'api/10-create_keys_proc.sqlpy',
+             'api/10-create_login_proc.sqlpy',
+             'api/10-create_otut_proc.sqlpy',
+             'api/10-create_profiles_proc.sqlpy',
+             'api/01-create_users.sqlpy',
+             'api/drop_groups.sqlpy',
+             'api/drop_misc.sqlpy',
+             'api/drop_users.sqlpy']
+
+for dbf in db_files:
+    env.Install(dir = dbdir, target = dbf)
+
+for dba in api_files:
+    env.Install(dir = dbdir, target = dba)
