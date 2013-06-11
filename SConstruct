@@ -239,10 +239,11 @@ libcomm = SConscript('libcomm/SConscript',
 SConscript('db/SConscript',
            exports = 'env dbdir',
            duplicate = 0)
-
 SConscript('kctl/SConscript',
            exports = 'env conf_options prefix bindir confdir pydir',
-           src_dir = 'kctl',
+           duplicate = 0)
+SConscript('config-stock/SConscript',
+           exports = 'env conf_options',
            duplicate = 0)
 
 # Main source
@@ -255,3 +256,4 @@ SConscript('src/SConscript',
 env.Alias('install', bindir)
 env.Alias('install', dbdir)
 env.Alias('install', pydir)
+env.Alias('install', confdir)
