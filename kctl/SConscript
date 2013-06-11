@@ -63,7 +63,7 @@ if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
     env.Install(bindir, kctl_sh)
 
     for s in command_files:
-        env.Install(kctllib_lib, s)
+        env.Install(kctlcmd_lib, s)
         
     for s in library_files:
-        env.Install(kctlcmd_lib, s)
+        env.Install(kctllib_lib, s)
