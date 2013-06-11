@@ -30,6 +30,7 @@ conf_options['pydir'] = pydir
 library_files = [
     'kctllib/__init__.py',
     'kctllib/kbin.py',
+    'kctllib/kconfig.py',
     'kctllib/kdatabase.py',
     'kctllib/kexcept.py',
     'kctllib/kiniconfig.py',
