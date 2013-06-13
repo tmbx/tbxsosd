@@ -1,4 +1,4 @@
 #!/bin/sh
 
 export PYTHONPATH=%(pydir)s
-%(pydir)s/kctl.py
+%(pydir)s/kctl.py $@
