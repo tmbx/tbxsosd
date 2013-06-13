@@ -52,7 +52,7 @@ def db_init(db_port = None):
 	except:
 		debug("Trying to read tbxsosd configuration.")		
 		import os
-		config = KTbxsosdConfig(source_file = os.path.join(CONF_DIR, "tbxsosd.conf"))
+		config = KTbxsosdConfig(source_file = os.path.join(CONF_DIR, "tbxsosd", "tbxsosd.conf"))
 		# This tells if kctl should try to login with the current username.
 		kctl_curr_creds = config.get("kctl.curr_creds")
 		dbs_info["name"] = config.get("db.name")
