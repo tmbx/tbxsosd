@@ -4,9 +4,11 @@
 ##### DATABASE STUFF
 #####
 
-import pgdb, os, time
+import pgdb
+import os
+import time
 
-from kctllib.kconfig import *
+from config import *
 from kctllib.kparams import *
 from kctllib.kexcept import *
 from kctllib.ktbxsosdconfig import *
@@ -49,6 +51,7 @@ def db_init(db_port = None):
 			dbs_info["port"] = db_port
 	except:
 		debug("Trying to read tbxsosd configuration.")		
+		import os
 		config = KTbxsosdConfig(source_file = os.path.join(CONF_DIR, "tbxsosd.conf"))
 		# This tells if kctl should try to login with the current username.
 		kctl_curr_creds = config.get("kctl.curr_creds")

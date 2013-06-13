@@ -245,6 +245,7 @@ SConscript('kctl/SConscript',
 SConscript('config-stock/SConscript',
            exports = 'env conf_options',
            duplicate = 0)
+SConscript('init/SConscript', exports = 'env conf_options', duplicate = 0)
 
 # Main source
 SConscript('src/SConscript',

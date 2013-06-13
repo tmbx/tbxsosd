@@ -1,3 +1,4 @@
+# Hey, Emacs! This is a -*- Python -*- file!
 #
 # Copyright (C) 2006-2012 Opersys inc.
 # 
@@ -48,9 +49,6 @@ command_files = [
     'kctlcmd/org_cmd.py',
     'kctlcmd/prof_cmd.py']
     
-env.AlwaysBuild(env.Command('kctllib/kconfig.py', 
-                            'kctllib/kconfig.py.in', 
-                            template_build))
 env.AlwaysBuild(env.Command('kctl', 'kctl.sh.in', 
                             [template_build, Chmod("$TARGET", 0755)]))
 
