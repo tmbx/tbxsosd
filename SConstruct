@@ -1,3 +1,4 @@
+# hey emacs, this is -*- python -*-
 #
 # Copyright (C) 2006-2012 Opersys inc.
 # 
@@ -13,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# hey emacs, this is -*- python -*-
 import commands, os, sys, glob, re
 
 # Per Laurent Birtz example.
@@ -37,7 +37,8 @@ opts.AddVariables(
     ('PREFIX', 'Architecture-independant files prefix', '/usr'),
     ('CONFDIR', 'Configuration file path', '/etc'),
     ('BINDIR', 'Executable path', '/usr/bin'),
-    ('DBDIR', 'Where to put the SQL-PY files.', '/usr/share/teambox/db'),
+    ('DBDIR', 'Directory where to copy the database (.sqlpy) files.', '/usr/share/teambox/db'),
+    ('WWWDIR', 'Root directory of the web applications', '/usr/share/teambox/www'),
     ('PYTHONDIR', 'Path to Python libraries.', '/usr/share/teambox/python'))
 
 #
@@ -45,7 +46,7 @@ opts.AddVariables(
 #
 
 # Setup the build environment.
-env = Environment(options = opts)
+env = Environment(tools = ['default', 'textfile'], options = opts)
 opts.Save('build.conf', env)
 
 # Generate the help text.
@@ -204,12 +205,14 @@ if env['single_dir']:
     bindir  = Dir(prefix)
     dbdir = Dir(prefix)
     pydir = Dir(prefix)
+    wwwdir = Dir(prefix)
 else:
     prefix  = Dir(os.path.join(str(env['DESTDIR']), str(env['PREFIX'])))
     confdir = Dir(os.path.join(str(prefix), str(env['CONFDIR'])))
     bindir  = Dir(os.path.join(str(prefix), str(env['BINDIR'])))
     dbdir = Dir(os.path.join(str(prefix), str(env['DBDIR'])))
     pydir = Dir(os.path.join(str(prefix), str(env['PYTHONDIR'])))
+    wwwdir = Dir(os.path.join(str(prefix), str(env['WWWDIR'])))
 #
 # Target linking.
 #
@@ -246,6 +249,7 @@ SConscript('config-stock/SConscript',
            exports = 'env conf_options',
            duplicate = 0)
 SConscript('init/SConscript', exports = 'env conf_options', duplicate = 0)
+SConscript('xmlrpc/SConscript', exports = 'env', duplicate = 0)
 
 # Main source
 SConscript('src/SConscript',
@@ -258,3 +262,4 @@ env.Alias('install', bindir)
 env.Alias('install', dbdir)
 env.Alias('install', pydir)
 env.Alias('install', confdir)
+env.Alias('install', wwwdir)
