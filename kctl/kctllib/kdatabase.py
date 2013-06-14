@@ -665,8 +665,8 @@ def sdb_set_org_license(kdn, lic):
 	db_debug_query(query)
 	db_exec(query)
 
-def sdb_add_org(org_name):
-	query = "select add_org(%s);" % ( db_safestr(org_name) )
+def sdb_add_org(org_name, key_id):
+	query = "select add_org(%s, %s);" % (db_safestr(org_name), db_safestr(key_id))
 	db_debug_query(query)
 	return db_get_first_element(query)
 sdb_addorg = sdb_add_org

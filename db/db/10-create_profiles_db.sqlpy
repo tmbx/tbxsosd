@@ -1,4 +1,4 @@
--- profiles_db.sql --- Master data structure for user handling.
+-- profiles_db.sql --- Master data structure for user handling. -*- sql -*-
 -- Copyright (C) 2005-2012 Opersys inc., All rights reserved.
 
 <<< connect(tbxsosd_db) >>>
@@ -34,9 +34,12 @@ create table organization (
        forward_to varchar,
        -- License determining what the user in that organization have
        -- to right to do on the KPS.
+       -- NOTE: No longer used. Remains for compatibility.
        license    varchar,
        -- Used by the web interface.
-       status     int
+       status     int,
+       -- Default key ID to use for member of the organization.
+       key_id     bigint
 ) without oids;
 
 <<< isnotable(profiles) >>>

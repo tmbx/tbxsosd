@@ -25,13 +25,13 @@ class LsOrgCommand(Command):
 
 class AddOrgCommand(Command):
 	Name = "addorg"
-	Syntax = "<organization name>"
-	Help = "Add a new organization."
-	MaxParams = 1
-	MinParams = 1
+	Syntax = "<organization name> <key_id>"
+	Help = "Add a new organization with a default key ID."
+	MaxParams = 2
+	MinParams = 2
 
-	def run(self, interpreter, org_name):	
-		org_id = sdb_addorg(org_name)
+	def run(self, interpreter, org_name, key_id):	
+		org_id = sdb_addorg(org_name, key_id)
 		db_commit()
 		scriptable_out("%s" % ( bbb(org_id) ))
 		out("Added organization no: %s." % ( aaa(org_id) ))

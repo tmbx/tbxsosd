@@ -147,17 +147,18 @@ end' language plpgsql;
 grant execute on function get_profile_name(bigint) to teambox_admin;
 
 -- Function to add an organization in the database.
-create or replace function add_org(varchar) returns bigint as '
+create or replace function add_org(varchar, bigint) returns bigint as '
 declare
         n alias for $1;
+        k alias for $2;
         oid bigint;
 begin
-        insert into organization (name) values (n);        
+        insert into organization (name, key_id) values (n, k);
         select into oid last_value from org_id_seq; 
         return oid;
 end' language plpgsql;
 
-grant execute on function add_org(varchar) to teambox_admin;
+grant execute on function add_org(varchar, bigint) to teambox_admin;
 
 -- Remove an email address or email part from a profile.
 create or replace function del_email(bigint, varchar) returns void as '
@@ -336,15 +337,16 @@ declare
         nm  alias for $2;
         gid bigint;
         pid bigint;
+        kid bigint;
         dummy int;
 begin
-        select into dummy 1 from organization where org_id = oid;
+        select into kid key_id from organization where org_id = oid;
         
         if not found then
                 raise exception ''Organization % not found'', oid;
         end if;
 
-        insert into profiles (org_id, prof_type) values (oid, ''G'');
+        insert into profiles (org_id, key_id, prof_type) values (oid, kid, ''G'');
         select into pid last_value from prof_id_seq;
         insert into group_profiles (group_name, status, prof_id) values (nm, ''A'', pid);
         select into gid last_value from group_id_seq;
@@ -405,13 +407,14 @@ declare
         ln  alias for $3;
         uid bigint;
         pid bigint;
+        kid bigint;
         dummy int;
 begin
-        select into dummy 1 from organization where org_id = oid;        
+        select into kid key_id from organization where org_id = oid;        
         if not found then
                 raise exception ''Organization % not found'', oid;
         end if;
-        insert into profiles (org_id, prof_type) values (oid, ''U'');
+        insert into profiles (org_id, key_id, prof_type) values (oid, kid, ''U'');
         select into pid last_value from prof_id_seq;
 
         insert into user_profiles (first_name, last_name, status, prof_id)
