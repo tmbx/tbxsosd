@@ -21,7 +21,7 @@ wwwDir = Dir(os.path.join(env['WWWDIR'], 'xmlrpc'))
 confDir = Dir(os.path.join(env['CONFDIR']))
 
 apacheConf = env.Substfile('tbxsos-xmlrpc.site.conf.in',
-                           SUBST_DICT = {'\$WWWDIR': env['WWWDIR']})
+                           SUBST_DICT = {'\$WWWDIR': str(wwwDir)})
 apacheDir = Dir(os.path.join('/etc', 'apache2', 'conf.d'))
 
 
