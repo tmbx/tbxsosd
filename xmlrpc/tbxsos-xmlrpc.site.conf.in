@@ -6,6 +6,8 @@ Alias /api/ $WWWDIR/
     Order allow,deny
     Allow from all
     
+    SetEnv PYTHONPATH $PYTHONDIR
+
     AddHandler cgi-script .py
     Options +FollowSymLinks +ExecCGI
 </Directory>
