@@ -1,0 +1,40 @@
+# Drop the database if required.
+<<< isset(drop), isdb(tbxsos_xmlrpc), print(Dropping database TBXSOS XMLRPC.), dropdb(tbxsos_xmlrpc) >>>
+
+# Exit if we don't need to create the database.
+<<< isnotset(create), exit() >>>
+
+# Create the database if required.
+<<< isnodb(tbxsos_xmlrpc), print(Creating database TBXSOS XMLRPC.), createdb(tbxsos_xmlrpc) >>>
+
+# Exit if we don't need to create the schema.
+<<< isset(noschema), exit() >>>
+
+# Connect to the database.
+<<< connect(tbxsos_xmlrpc) >>>
+
+# Create the plpgsql language if required.
+<<< isnolang(plpgsql), print(Creating language plpgsql.) >>>
+CREATE LANGUAGE plpgsql;
+
+# Create the TBXSOS XMLRPC tables if required
+<<< isnotable(session), print(Creating TBXSOS XMLRPC tables.) >>>
+
+CREATE TABLE session (
+
+    -- ID of the session.
+    id varchar PRIMARY KEY,
+
+    -- Data of the session (pickled Python object).
+    data bytea,
+
+    -- Creation date of the session, in seconds since UNIX epoch.
+    creation_date bigint,
+
+    -- Last read time for the session
+    last_read bigint,
+
+    -- Last update time of the session.
+    last_update bigint
+);
+
