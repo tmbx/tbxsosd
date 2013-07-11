@@ -73,7 +73,8 @@ if env['debug']:
     env['CPPDEFINES'] += ['KD_DEBUG', 'APR_POOL_DEBUG=7']
 else:
     conf_options['debug'] = 0
-    env['CCFLAGS'] += ['-O2']
+    env['LINKFLAGS'] +=  ['-g']
+    env['CCFLAGS'] += ['-g', '-g3', '-O2']
 
 #
 # Build configuration.
