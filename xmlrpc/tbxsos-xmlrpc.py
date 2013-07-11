@@ -101,7 +101,7 @@ class FreemiumKcdClient:
         m.add_str(license)
 
         # Do the query.
-        query = "SELECT set_freemium_user(E'%s')" % ( pgdb.escape_bytea(m.get_payload()) )
+        query = "SELECT set_freemium_user('%s')" % ( pgdb.escape_bytea(m.get_payload()) )
         cur = kpg.exec_pg_query_rb_on_except(self.db_conn, query)
         row = cur.fetchone()
         self.db_conn.commit()
@@ -477,7 +477,7 @@ class KPSApi:
 
         # Check if user has access to this organization.
         security_ctx_check_org(session, org_id)
-
+        
         # Freemium database changes
         fdb = pgdb.connect(host = f_db_host, database = f_db_name)#,  user = f_db_username, password = f_db_password)
         fcur = fdb.cursor()
