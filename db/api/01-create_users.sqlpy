@@ -3,16 +3,6 @@
 
 <<< connect(tbxsosd_db) >>>
 
-<<< isnouser(www-data) >>>
-create role "www-data" inherit login superuser in role teambox_admin;
-
-<<< isnouser(root) >>>
-create role root inherit login superuser in role teambox_admin;
-
-<<< isnouser(tbxsosd_slony) >>>
--- For replications.
-create role tbxsosd_slony login superuser in role teambox_admin;
-
 -- Individual database.
 <<< isnouser(user_event) >>>
 create role user_event inherit login in role teambox_event;
