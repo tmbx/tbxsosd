@@ -28,26 +28,8 @@ def template_build(target, source, env):
 # Passed to the kctl.sh template.
 conf_options['pydir'] = pydir
 
-library_files = [
-    'kctllib/__init__.py',
-    'kctllib/kbin.py',
-    'kctllib/kconfig.py',
-    'kctllib/kdatabase.py',
-    'kctllib/kexcept.py',
-    'kctllib/kiniconfig.py',
-    'kctllib/kkeys.py',
-    'kctllib/kparams.py',    
-    'kctllib/ktbxsosdconfigdaemon.py',
-    'kctllib/ktbxsosdconfig.py']
-
-command_files = [
-    'kctlcmd/__init__.py',
-    'kctlcmd/key_cmd.py',
-    'kctlcmd/login_cmd.py',
-    'kctlcmd/misc_cmd.py',
-    'kctlcmd/misc.py',
-    'kctlcmd/org_cmd.py',
-    'kctlcmd/prof_cmd.py']
+library_files = env.Glob("kctllib/*.py")
+command_files = env.Glob("kctlcmd/*.py")
     
 env.AlwaysBuild(env.Command('kctl', 'kctl.sh.in', 
                             [template_build, Chmod("$TARGET", 0755)]))
