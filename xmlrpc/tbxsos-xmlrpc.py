@@ -34,7 +34,7 @@ log = None
 sess_database='tbxsos_xmlrpc'
 
 # config file path
-ini_conf_path = os.path.join(CONF_DIR, "tbxsos-xmlrpc.ini")
+ini_conf_path = os.path.join(CONF_DIR, "tbxsosd/tbxsos-xmlrpc.ini")
 
 # main key path
 #main_priv_enc_key_path = "/etc/teambox/act/keys/main/email.enc.pkey"
@@ -109,11 +109,16 @@ class FreemiumKcdClient:
         return 0
 
 # Load session and run some checks.
-def session_load(sid):
+def session_load(sid, config):
     validate_non_empty_string(sid)
     try:
         # Load session.
-        session = kweb_session.ksession_get_session(sid, database=sess_database)
+        session = kweb_session.ksession_get_session(db_name = config.get('db', 'db_name'),
+                                                    db_host = config.get('db', 'db_host'),
+                                                    db_port = config.get('db', 'db_port'),
+                                                    db_user = config.get('db', 'db_user'),
+                                                    db_pwd = config.get('db', 'db_pwd'),
+                                                    sid = sid)
     except Exception, e:
         log.error("Session error: '%s'." % ( str(e) ) )
         raise xmlrpclib.Fault(101, "Internal error (" + str(e) + ").")
@@ -224,6 +229,11 @@ def convert_pg_timestamp_to_epoch(ts):
 
 # Methods available to the client
 class KPSApi:
+    def __init__(self):
+        # Load config
+        self.config = CustomConfigParser()
+        self.config.read(ini_conf_path)
+
     def test_int(self):
         return 123
 
@@ -246,27 +256,31 @@ class KPSApi:
         login = validate_login(login)
         password = validate_password(password)
 
-        # Load config
-        config = CustomConfigParser()
-        config.read(ini_conf_path)
-
         # Check login/pass pair.
-        if not config.has_section(login):
+        if not self.config.has_section(login):
             raise xmlrpclib.Fault(201, "No password configured.")
-        goodpass = config.get_default(login, "password", "").strip(" ")
+        goodpass = self.config.get_default(login, "password", "").strip(" ")
         if goodpass == "":
             log.error("Invalid configuration 'password' for login '%s'." % ( login ) )
             raise xmlrpclib.Fault(201, "No password configured.")                
         if goodpass != password: 
             raise xmlrpclib.Fault(201, "Invalid login or password.")
 
+        db_name = self.config.get('db', 'db_name')
+        db_host = self.config.get('db', 'db_host')
+        db_port = self.config.get('db', 'db_port')
+        db_user = self.config.get('db', 'db_user')
+        db_pwd = self.config.get('db', 'db_pwd')
+
         # Create session.
-        session = kweb_session.ksession_get_session(database=sess_database)
+        session = kweb_session.ksession_get_session(db_name = db_name, db_host = db_host,
+                                                    db_port = db_port, db_user = db_user,
+                                                    db_pwd = db_pwd)
         session.data["kpsapi"] = 1
         session.data["start_stamp"] = int(time.time())
 
         # Load security context.
-        security_ctx = config.get_default(login, "security_ctx", "").strip(" ")
+        security_ctx = self.config.get_default(login, "security_ctx", "").strip(" ")
         if security_ctx not in valid_security_contexts:
             log.error("Invalid configuration 'security_ctx' for login '%s'." % ( login ) )
             raise xmlrpclib.Fault(106, "Invalid KPS API configuration.")
@@ -293,7 +307,7 @@ class KPSApi:
     # Returns: (string) security context
     def get_security_context(self, sid):
         # Load session.
-        session = session_load(sid)
+        session = session_load(sid, self.config)
 
         return session.data["security_ctx"]
 
@@ -301,7 +315,7 @@ class KPSApi:
     # Returns: (str bigint) organization ID
     def get_security_context_org_id(self, sid):
         # Load session.
-        session = session_load(sid)
+        session = session_load(sid, self.config)
 
         # Make sure user is logged with the KAPI_SECURITY_CTX_ORG security context.
         session_security_context_check(session, KAPI_SECURITY_CTX_ORG)
@@ -312,7 +326,7 @@ class KPSApi:
     # Returns: (str bigint) user ID
     def add_user(self, sid, org_id, full_name, email, login, password):
         # Load session.
-        session = session_load(sid)
+        session = session_load(sid, self.config)
 
         # Initialize the database (kctl).
         db_init()
@@ -367,7 +381,7 @@ class KPSApi:
     # Returns: (integer) 1
     def modify_user(self, sid, user_id, full_name, email, login, password):
         # Load session.
-        session = session_load(sid)
+        session = session_load(sid, self.config)
 
         # Initialize the database (kctl).
         db_init()
@@ -457,15 +471,13 @@ class KPSApi:
     def set_freemium_user(self, sid, org_id, email, password, license , nonce, note='', override_tbxsosd = False):
         db_init()
         #TODO: refactor the DB connection code and query exec out
-        session = session_load(sid)
+        session = session_load(sid, self.config)
 
-        #TODO: Modify kpsapi.ini and read from config file
-        f_db_name = "freemium";
-        #f_db_username = "freemium_user";
-        #f_db_password = "123";
-        f_db_host = "/var/run/postgresql";
-        f_db_port = "5432";
-        f_db_timeout = "5000";
+        f_db_name = self.config.get('db', 'db_name')
+        f_db_host = self.config.get('db', 'db_host')
+        f_db_port = self.config.get('db', 'db_port')
+        f_db_user = self.config.get('db', 'db_user')
+        f_db_pwd = self.config.get('db', 'db_pwd')
 
 	email = validate_login(email)
 
@@ -479,7 +491,9 @@ class KPSApi:
         security_ctx_check_org(session, org_id)
         
         # Freemium database changes
-        fdb = pgdb.connect(host = f_db_host, database = f_db_name)#,  user = f_db_username, password = f_db_password)
+        fdb = pgdb.connect(db_host = f_db_host, db_name = f_db_name, 
+                           db_user = f_db_username, db_pwd = f_db_password,
+                           db_port = f_db_port)
         fcur = fdb.cursor()
         try:
             # Delete the row with the input email address from freemium DB.
@@ -588,7 +602,7 @@ class KPSApi:
     # Returns: (integer) 1
     def remove_user(self, sid, user_id):
         # Load session.
-        session = session_load(sid)
+        session = session_load(sid, self.config)
 
         # Initialize the database (kctl).
         db_init()
@@ -616,7 +630,7 @@ class KPSApi:
     # Returns: (array of dictionaries)
     def list_org_users(self, sid, org_id):
         # Load session.
-        session = session_load(sid)
+        session = session_load(sid, self.config)
 
         # Initialize the database (kctl).
         db_init()
@@ -663,7 +677,7 @@ class KPSApi:
     # Adds a secondary email to a user.
     # Returns: (integer) 1
     def add_user_email(self, sid, user_id, email):
-        session = session_load(sid)
+        session = session_load(sid, self.config)
         db_init()
 
         # Validate parameters.
@@ -689,7 +703,7 @@ class KPSApi:
     # Deletes a secondary email from a user.
     # Returns: (integer) 1
     def remove_user_email(self, sid, user_id, email):
-        session = session_load(sid)
+        session = session_load(sid, self.config)
         db_init()
 
         # Validate parameters.
@@ -720,7 +734,7 @@ class KPSApi:
     # List emails associated to a user.
     # Returns: (array of dictionaries)
     def list_user_emails(self, sid, user_id):
-        session = session_load(sid)
+        session = session_load(sid, self.config)
         db_init()
 
         # Validate parameters.

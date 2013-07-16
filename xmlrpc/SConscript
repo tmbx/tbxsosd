@@ -25,11 +25,13 @@ apacheConf = env.Substfile('tbxsos-xmlrpc.site.conf.in',
                                          '\$PYTHONDIR': str(env['PYTHONDIR'])})
 apacheDir = Dir(os.path.join('/etc', 'apache2', 'conf.d'))
 
-env.Install(source = File('tbxsos-xmlrpc.py'), 
-            target = wwwDir)
 env.Install(source = apacheConf,
             target = apacheDir)
+env.InstallAs(source = File('tbxsos-xmlrpc.py'), 
+              target = os.path.join(str(wwwDir), 'api.py'))
 env.InstallAs(source = File(os.path.join('config-stock', "kpsapi.ini.stock")),
               target = File(os.path.join(str(confDir), "tbxsos-xmlrpc.ini")))
+
+print os.path.join(str(confDir), "tbxsos-xmlrpc.ini")
 
 env.Alias('install', apacheDir)

@@ -4,6 +4,13 @@
 # Do not change!
 config_version = 2.0
 
+[db]
+db_host = localhost
+db_port = 5432
+db_name = freemium
+db_user = freemium
+db_pwd = freemium_replace_this_password
+
 # This is the configuration for login "admin".
 # This is a template for an admin login.
 # It is disabled by default (no password).
