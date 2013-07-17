@@ -492,7 +492,7 @@ class KPSApi:
         
         # Freemium database changes
         fdb = pgdb.connect(db_host = f_db_host, db_name = f_db_name, 
-                           db_user = f_db_username, db_pwd = f_db_password,
+                           db_user = f_db_user, db_pwd = f_db_pwd,
                            db_port = f_db_port)
         fcur = fdb.cursor()
         try:
