@@ -491,9 +491,8 @@ class KPSApi:
         security_ctx_check_org(session, org_id)
         
         # Freemium database changes
-        fdb = pgdb.connect(host = f_db_host, dbname = f_db_name, 
-                           user = f_db_user, passwd = f_db_pwd,
-                           port = f_db_port)
+        fdb = pgdb.connect(host = f_db_host, database = f_db_name, 
+                           user = f_db_user, password = f_db_pwd)
         fcur = fdb.cursor()
         try:
             # Delete the row with the input email address from freemium DB.
