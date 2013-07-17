@@ -286,7 +286,7 @@ class KPSApi:
             raise xmlrpclib.Fault(106, "Invalid KPS API configuration.")
         session.data["security_ctx"] = security_ctx
         if session.data["security_ctx"] == KAPI_SECURITY_CTX_ORG:
-            str_org_id = config.get_default(login, "org_id", "").strip(" ")
+            str_org_id = self.config.get_default(login, "org_id", "").strip(" ")
             if not str_org_id.isdigit():
                 log.error("Invalid configuration 'org_id' for login '%s'." % ( login ) )
                 raise xmlrpclib.Fault(106, "Invalid KPS API configuration.")
