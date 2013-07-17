@@ -30,8 +30,6 @@ create role teambox_pubkeys nosuperuser nocreatedb nocreaterole inherit nologin 
 create role teambox_cleaner nosuperuser nocreatedb nocreaterole inherit nologin in role teambox;
 
 <<< isnorole(teambox_admin) >>>
--- the admin user, used by kctl. member of every groups. it should be a group,
--- but kctl depend on that user name.
 create role teambox_admin nosuperuser nocreatedb nocreaterole inherit login connection limit 6 
        in role 
           teambox_event, teambox_login, teambox_otut, teambox_privkeys, teambox_profiles, teambox_pubkeys;
@@ -39,4 +37,4 @@ create role teambox_admin nosuperuser nocreatedb nocreaterole inherit login conn
 <<< isnorole(tbxsosd) >>>
 create role tbxsosd nosuperuser nocreatedb nocreaterole inherit login 
        in role
-          teambox_event, teambox_login, teambox_otut, teambox_privkeys, teambox_profiles, teambox_pubkeys;
+          teambox_event, teambox_login, teambox_otut, teambox_privkeys, teambox_profiles, teambox_pubkeys, teambox_admin;
