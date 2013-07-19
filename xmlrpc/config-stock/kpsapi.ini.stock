@@ -11,6 +11,12 @@ db_name = tbxsos_xmlrpc
 db_user = xmlrpc
 db_pwd = xmlrpc_replace_this_pwd
 
+freemium_db_host = localhost
+freemium_db_port = 5432
+freemium_db_name = tbxsos_xmlrpc
+freemium_db_user = freemium
+freemium_db_pwd = freemium_replace_this_pwd
+
 # This is the configuration for login "admin".
 # This is a template for an admin login.
 # It is disabled by default (no password).

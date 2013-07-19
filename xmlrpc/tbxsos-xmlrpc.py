@@ -473,11 +473,11 @@ class KPSApi:
         #TODO: refactor the DB connection code and query exec out
         session = session_load(sid, self.config)
 
-        f_db_name = self.config.get('db', 'db_name')
-        f_db_host = self.config.get('db', 'db_host')
-        f_db_port = self.config.get('db', 'db_port')
-        f_db_user = self.config.get('db', 'db_user')
-        f_db_pwd = self.config.get('db', 'db_pwd')
+        f_db_name = self.config.get('db', 'freemium_db_name')
+        f_db_host = self.config.get('db', 'freemium_db_host')
+        f_db_port = self.config.get('db', 'freemium_db_port')
+        f_db_user = self.config.get('db', 'freemium_db_user')
+        f_db_pwd = self.config.get('db', 'freemium_db_pwd')
 
 	email = validate_login(email)
 
