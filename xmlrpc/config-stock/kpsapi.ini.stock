@@ -62,7 +62,7 @@ db_pwd = freemium_replace_this_password
 [freemium]
 password = hard-coded-pass
 security_ctx = org
-org_id = 0
+org_id = 1
 
 [loggers]
 keys = tbxsosxmlrpc,root
