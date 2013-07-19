@@ -42,6 +42,6 @@ CREATE TABLE session (
     last_update bigint
 );
 
-GRANT ALL ON DATABASE xmlrpc TO xmlrpc;
+GRANT ALL ON DATABASE tbxsos_xmlrpc TO xmlrpc;
 SELECT grant_to_all_tables('xmlrpc', 'all');
 SELECT grant_to_all_sequences('xmlrpc', 'usage');
