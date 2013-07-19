@@ -1,3 +1,4 @@
+# hey emacs, this is -*- python -*-
 #
 # Copyright (C) 2006-2012 Opersys inc.
 # 
@@ -13,32 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import os, socket
 Import('env conf_options')
 
-def template_build(target, source, env):
-    for a_target, a_source in zip(target, source):
-        targetFile = file(str(a_target), "w")
-        sourceFile = file(str(a_source), "r")
-        targetFile.write(sourceFile.read() % conf_options)
-        sourceFile.close()
-        targetFile.close()
+config_files = env.Glob("*.conf");
 
-config_files = ['client.conf',
-                'db.conf',
-                'filter.conf',
-                'keysign.conf',
-                'ldap.conf',
-                'log.conf',
-                'otut.conf',
-                'pod.conf', 
-                'server.conf',
-                'ssl.conf',
-                'tbxsosd.conf',
-                'web.conf']
-
-conf_options['confdir'] = env['CONFDIR']
-env.AlwaysBuild(env.Command("ssl.conf", "ssl.conf.in", template_build))
+server_conf = env.Substfile("server.conf.in",
+                            SUBST_DICT = {'\$HOSTNAME': socket.gethostname() })
+ssl_conf = env.Substfile("ssl.conf.in",
+                         SUBST_DICT = {'\$CONFDIR': env['CONFDIR'] })
 
 for cf in config_files:
     env.Install(dir = env['CONFDIR'], target = cf)
+
+env.Install(target = env['CONFDIR'], source = server_conf)
+env.Install(target = env['CONFDIR'], source = ssl_conf)

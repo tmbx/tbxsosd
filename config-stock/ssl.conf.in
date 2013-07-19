@@ -17,8 +17,8 @@
 # KPSes should not enforce a default certificate.  Other Teambox
 # services using tbxsosd should.
 
-ssl.keys = "1:%(confdir)s/ssl/tbxsosd.key";
-ssl.certs = "1:%(confdir)s/ssl/tbxsosd.crt";
+ssl.keys = "1:$CONFDIR/ssl/tbxsosd.key";
+ssl.certs = "1:$CONFDIR/ssl/tbxsosd.crt";
 
 # NOTE: This is not a boolean.  This is the number of the certificate
 # we have to use as default certificate for connexion that do not
