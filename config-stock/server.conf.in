@@ -26,7 +26,7 @@ server.log_verbosity = "9";
 server.pid_file = "/var/run/tbxsosd.pid";
 
 # Server runtime data path.
-server.data_file = "/var/cache/teambox/tbxsosd.data";
+server.data_file = "/var/cache/teambox/tbxsosd/tbxsosd.data";
 
 # Space separated list of domains for which this server is
 # authoritative.  It may be empty.  The maximum length of the string
