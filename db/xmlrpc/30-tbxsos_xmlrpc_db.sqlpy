@@ -19,7 +19,7 @@ CREATE LANGUAGE plpgsql;
 
 # Create the user to connect to this database.
 <<< isnorole(xmlrpc), print(Creating xmlrpc DB user) >>>
-CREATE ROLE xmlrpc LOGIN
+CREATE ROLE xmlrpc LOGIN;
 
 # Create the TBXSOS XMLRPC tables if required
 <<< isnotable(session), print(Creating TBXSOS XMLRPC tables.) >>>
