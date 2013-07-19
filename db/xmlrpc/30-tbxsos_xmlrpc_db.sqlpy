@@ -17,6 +17,10 @@
 <<< isnolang(plpgsql), print(Creating language plpgsql.) >>>
 CREATE LANGUAGE plpgsql;
 
+# Create the user to connect to this database.
+<<< isnorole(xmlrpc), print(Creating xmlrpc DB user) >>>
+CREATE ROLE xmlrpc LOGIN
+
 # Create the TBXSOS XMLRPC tables if required
 <<< isnotable(session), print(Creating TBXSOS XMLRPC tables.) >>>
 
@@ -38,3 +42,6 @@ CREATE TABLE session (
     last_update bigint
 );
 
+GRANT ALL ON DATABASE xmlrpc TO xmlrpc;
+SELECT grant_to_all_tables('xmlrpc', 'all');
+SELECT grant_to_all_sequences('xmlrpc', 'usage');
