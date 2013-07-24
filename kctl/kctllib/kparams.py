@@ -6,6 +6,7 @@ from kctllib.kiniconfig import *
 
 # kpython
 from kout import *
+from config import BINDIR
 
 kparams = {}
 
@@ -16,7 +17,7 @@ def kparams_init():
 	kparams["commit"] = True
 	kparams["db_debug_query"] = False
 	kparams["kctl"] = "/usr/bin/kctl"
-	kparams["kctlbin"] = "/usr/bin/kctlbin"
+	kparams["kctlbin"] = os.path.join(BINDIR, "kctlbin")
 
 	# try to load params from ini config
 	try:

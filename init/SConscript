@@ -1,4 +1,3 @@
-# Hey, Emacs! This is a -*- Python -*- file!
 #
 # Copyright (C) 2006-2012 Opersys inc.
 # 
@@ -15,7 +14,7 @@
 # limitations under the License.
 
 import os
-Import('env conf_options prefix bindir confdir pydir')
+Import('env conf_options')
 
 def template_build(target, source, env):
     for a_target, a_source in zip(target, source):
@@ -25,26 +24,6 @@ def template_build(target, source, env):
         sourceFile.close()
         targetFile.close()
 
-# Passed to the kctl.sh template.
-conf_options['pydir'] = pydir
+conf_options['bindir'] = env['BINDIR']
+env.AlwaysBuild(env.Command('tbxsosd', 'tbxsosd.debian.init.in', template_build))
 
-library_files = env.Glob("kctllib/*.py")
-command_files = env.Glob("kctlcmd/*.py")
-    
-env.AlwaysBuild(env.Command('kctl', 'kctl.sh.in', 
-                            [template_build, Chmod("$TARGET", 0755)]))
-
-kctl_sh = File("kctl")
-kctl_prog = File("kctl.py")
-kctlcmd_lib = env.Dir(os.path.join(str(pydir), "kctlcmd"))
-kctllib_lib = env.Dir(os.path.join(str(pydir), "kctllib"))
-
-if 'install' in COMMAND_LINE_TARGETS and not env.GetOption('clean'):
-    env.Install(pydir, kctl_prog)
-    env.Install(bindir, kctl_sh)
-
-    for s in command_files:
-        env.Install(kctlcmd_lib, s)
-        
-    for s in library_files:
-        env.Install(kctllib_lib, s)

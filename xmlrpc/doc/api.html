@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /><title>KPS Api documentation</title>
+
+<style type="text/css">
+div.source_code { background-color: #EEEEEE; margin-left: 3em; margin-right: 3em; padding-left: 2em; padding-right: 2em; border: 1px black solid; font-size: 80%;}
+.security_context { font-weight: bold; }
+ul.tb_contents { margin-left: 1em; }
+ul.tb_contents li { margin-left: 1em; }
+.tb_contents_link { display: block; }
+.data_type { font-weight: bold; }
+.arg { color: green; }
+span.call { margin: 0; padding: 0; font-weight: bold; margin-right: 0.2em; color: green; }
+p.call_usage { margin: 0; padding: 0; }
+li.call_context, li.call_return, li.call_faults { margin: 0; padding: 0; margin-left: 1em; }
+p.call_desc { margin: 0; padding: 0; margin-bottom: 1em; margin-left: 1em; }
+span.fault_code { color: blue; }
+span.fault_desc { }
+</style></head>
+<body>
+<h1>Teambox KPS API documentation</h1>
+<p>v1.0</p>
+<p>This document describes the exposed API for automated user
+management on the Teambox Sign-On Server (TBXSOS).</p>
+<h2>Table of contents </h2>
+<p><a class="tb_contents_link" href="#introduction">Introduction</a></p>
+<ul class="tb_contents">
+<li><a class="tb_contents_link" href="#protocol">Protocol</a></li>
+<li><a href="#configuration" class="tb_contents_link">Configuration</a></li>
+<li><a class="tb_contents_link" href="#authentication">Authentication</a></li>
+<li><a class="tb_contents_link" href="#security_contexts">Security contexts</a></li>
+</ul>
+<p><a class="tb_contents_link" href="#api_reference">API
+reference</a></p>
+<ul class="tb_contents">
+<li><a class="tb_contents_link" href="#api_calls">API
+calls</a></li>
+<li><a class="tb_contents_link" href="#server_faults">Faults</a></li>
+</ul>
+<p><a href="#examples">Examples</a></p>
+<ul class="tb_contents">
+<li><a href="#code_example1">Example 1</a></li>
+</ul>
+<h2>Introduction<a name="introduction" id="introduction"></a></h2>
+<h3>Protocol<a name="protocol" id="protocol"></a></h3>
+<p>KPS API uses XMLRPC. </p>
+<h3>Configuration<a name="configuration" id="configuration"></a></h3>
+<p>The API configuration file is located on the KPS filesystem,
+in the file '<em>/etc/teambox/kpsapi/kpsapi.ini</em>'.
+This is where the login/password tuples that are allowed to access
+the&nbsp;API are stored.</p>
+<h3>Authentication<a name="authentication" id="authentication"></a></h3>
+<p>
+The API relies on a login/password pair in order to create an
+authenticated session, inside of which any API call must be called
+from. See the <a href="#configuration">Configuration</a>
+section.</p>
+<h3>Security contexts<a name="security_contexts" id="security_contexts"></a></h3>
+<p>
+Every user that can connect to the API has an associated security
+context. Security contexts define what operations a particular user can
+or can't perform.
+There are two types of security contexts: <span class="security_context">'admin'</span> and <span class="security_context">'org'</span>. The <span class="security_context">admin</span> security context
+provides unrestricted access. The <span class="security_context">org</span>
+security context provides unrestricted access to a precise organization
+only. The organization ID must be associated to a particular login in
+the API configuration file.</p>
+<h3>Data types<a name="data_types" id="data_types"></a></h3>
+<ul>
+<li class="data_type">int(32)</li>
+<li class="data_type">sint(64) * </li>
+<li><span class="data_type">string(XXX)</span>
+where XXX is the maximum length of the string </li>
+<li class="data_type">list</li>
+<li class="data_type">dictionary</li>
+</ul>
+<p>
+* The XMLRPC protocol does not support the <span class="data_type">int(64)</span>
+type, so values must be converted to <span class="data_type">string</span>
+on the client side before being sent to server. Conversely, int(64) are
+converted to <span class="data_type">string</span>
+when leaving the server. Values using this type are identified
+as&nbsp;<span class="data_type">sint(64)</span>.</p>
+<h2>API reference <a name="api_reference" id="api_reference"></a></h2>
+<p>API calls are described as follow:</p>
+<p class="call_usage"><span class="call">function_name</span>(<span class="data_type">type</span> <span class="arg">argument_1</span>,
+[<span class="data_type">type</span> <span class="arg">argument_n</span> ...])</p>
+<li class="call_context">Context: The security context(s)
+in which the function can be called.</li>
+<li class="call_return">Return: (<span class="data_type">type</span>)
+Short description of the return value.</li>
+<li class="call_faults">Faults: List of RPC faults that
+you must expect from this function.</li>
+<p class="call_desc">A short description about the
+function.</p>
+<h3>API functions<a name="api_calls" id="api_calls"></a></h3>
+<p class="call_usage"><span class="call">session_login<a name="call_session_login"></a></span>(<span class="data_type">string</span> <span class="arg">login</span>,
+<span class="data_type">string</span> <span class="arg">password</span>)</p>
+<li class="call_context">Context: N/A</li>
+<li class="call_return">Return: <span class="data_type">string</span>
+session ID</li>
+<li class="call_faults">Faults: 10x, 11x, 12x, 201 (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">Authenticate on the RPC server using a
+login / password pair. These are configured within the <a href="#configuration">configuration</a> file.</p>
+<p class="call_usage"><span class="call">get_security_context</span>(<span class="data_type">string</span> <span class="arg">sid</span>)</p>
+<li class="call_context">Context: all contexts</li>
+<li class="call_return">Return: <span class="data_type">string</span>
+the security context</li>
+<li class="call_faults">Faults: 1xx (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc"> Get the security context of the
+login used when
+creating a session (session_login call). This can be used to validate
+the API configuration file is working properly.
+</p>
+<p class="call_usage"><span class="call">get_security_context_org_id</span>(<span class="data_type">string</span> <span class="arg">sid</span>)</p>
+<li class="call_context">Context:&nbsp;<span class="security_context">org</span></li>
+<li class="call_return">Return: <span class="data_type">sint(64)</span>
+organization ID</li>
+<li class="call_faults">Faults: 1xx (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">Get the current user's organization
+ID (see the <a href="#configuration">Configuration</a>
+section).</p>
+<p class="call_usage"><span class="call">add_user</span>(<span class="data_type">string</span> <span class="arg">sid</span>,
+<span class="data_type">sint(64)</span> <span class="arg">org_id</span>, <span class="data_type">string(200)</span>
+<span class="arg">full_name</span>, <span class="data_type">string(200)</span> <span class="arg">email</span>, <span class="data_type">string(50)</span>
+<span class="arg">login</span>, <span class="data_type">string(50)</span> <span class="arg">password</span>)</p>
+<li class="call_context">Context: all contexts</li>
+<li class="call_return">Return: <span class="data_type">sint(64)</span>
+user ID</li>
+<li class="call_faults">Faults: 1xx, 241, 285, 292 (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">Add a user to the given organization
+ID. </p>
+<p class="call_usage"><span class="call">modify_user</span>(<span class="data_type">string</span> <span class="arg">sid</span>, <span class="data_type">sint(64)</span> <span class="arg">user id</span>, <span class="data_type">string(200)</span>
+<span class="arg">full_name</span>, <span class="data_type">string(200)</span> <span class="arg">email</span>, <span class="data_type">string(50)</span>
+<span class="arg">login</span>, <span class="data_type">string(50)</span> <span class="arg">password</span>)</p>
+<li class="call_context">Context:&nbsp;all contexts</li>
+<li class="call_return">Return: <span class="data_type">int(32)</span>
+1</li>
+<li class="call_faults">Faults: 1xx, 271, 285, 292 (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">Modify an existing KPS user.</p>
+<p class="call_usage"><span class="call">remove_user</span>(<span class="data_type">string</span> <span class="arg">sid</span>, <span class="data_type">sint(64)</span> <span class="arg">user_id</span>)</p>
+<li class="call_context">Context:&nbsp;all contexts</li>
+<li class="call_return">Return: <span class="data_type">int(32)</span>
+1</li>
+<li class="call_faults">Faults: 1xx, 271 (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">Delete an existing user.</p>
+<p class="call_usage"><span class="call">list_org_users</span>(<span class="data_type">string</span> <span class="arg">sid</span>,
+<span class="data_type">sint(64)</span> <span class="arg">org_id</span>)</p>
+<li class="call_context">Context:&nbsp;all contexts</li>
+<li class="call_return">Return:&nbsp;<span class="data_type">list</span> of <span class="data_type">dictionaries</span> with those keys:
+<span class="data_type">sint(64)</span> user ID, <span class="data_type">string</span> full name, <span class="data_type">string</span> email, <span class="data_type">string</span> login, <span class="data_type">string</span> password
+</li>
+<li class="call_faults">Faults: 1xx, 241 (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">List KPS users associated to the
+specified organization.</p>
+<p class="call_usage"><span class="call">add_user_email</span>(<span class="data_type">string</span> <span class="arg">sid</span>,
+<span class="data_type">sint(64)</span> <span class="arg">user_id</span>, <span class="data_type">string(200)</span>
+<span class="arg">email</span>)</p>
+<li class="call_context">Context:&nbsp;all contexts</li>
+<li class="call_return">Return: <span class="data_type">int(32)</span>
+<span class="arg">1</span></li>
+<li class="call_faults">Faults: 1xx, 271, 292 (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">Add a secondary email to an existing
+user.</p>
+<p class="call_usage"><span class="call">remove_user_email</span>(<span class="data_type">string</span> <span class="arg">sid</span>,
+<span class="data_type">sint(64)</span> <span class="arg">user_id</span>, <span class="data_type">string(200)</span>
+<span class="arg">email</span>)</p>
+<li class="call_context">Context:&nbsp;all contexts</li>
+<li class="call_return">Return: <span class="data_type">int(32)</span>
+1</li>
+<li class="call_faults">Faults: 1xx, 271, 291 (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">Remove the given secondary email from
+an existing user.</p>
+<p class="call_usage"><span class="call">list_user_emails</span>(<span class="data_type">string</span> <span class="arg">sid</span>,
+<span class="data_type">sint(64)</span> <span class="arg">user_id</span>)</p>
+<li class="call_context">Context:&nbsp;all contexts</li>
+<li class="call_return">Return:&nbsp;<span class="data_type">list</span> of <span class="data_type">dictionaries</span>&nbsp;with
+those keys: <span class="data_type">string</span>
+email, <span class="data_type">int(32)</span>
+is_primary</li>
+<li class="call_faults">Faults: 1xx, 271 (see <a href="#server_faults">faults</a> section)</li>
+<p class="call_desc">List the primary and secondary emails
+of the given user.</p>
+<h3>Server faults:<a name="server_faults" id="server_faults"></a></h3>
+<li><span class="fault_code">1<a name="fault_1" id="fault_1"></a></span>: <span class="fault_desc">Default server faults.</span></li>
+<li><span class="fault_code">101<a name="fault_101" id="fault_101"></a></span>:
+<span class="fault_desc">Internal error.</span></li>
+<li><span class="fault_code">102<a name="fault_102" id="fault_102"></a></span>:
+<span class="fault_desc">Invalid parameter.</span></li>
+<li><span class="fault_code">103<a name="fault_103" id="fault_103"></a></span>:
+<span class="fault_desc">Invalid function.</span></li>
+<li><span class="fault_code">104<a name="fault_104" id="fault_104"></a></span>:
+<span class="fault_desc">Function expects X arguments.</span></li>
+<li><span class="fault_code">105<a name="fault_105" id="fault_105"></a></span>:
+<span class="fault_desc">Bad server activation.</span></li>
+<li><span class="fault_code">106<a name="fault_106" id="fault_106"></a></span>:
+<span class="fault_desc">Invalid KPS API configuration.</span></li>
+<li><span class="fault_code">121<a name="fault_121" id="fault_121"></a></span>:
+<span class="fault_desc">NULL value not supported.</span></li>
+<li><span class="fault_code">122<a name="fault_122" id="fault_122"></a></span>:
+<span class="fault_desc">Empty string not supported.</span></li>
+<li><span class="fault_code">123<a name="fault_123" id="fault_123"></a></span>:
+<span class="fault_desc">String is too long.</span></li>
+<li><span class="fault_code">126<a name="fault_126" id="fault_126"></a></span>:
+<span class="fault_desc">int(32) or numeric string
+expected.</span></li>
+<li><span class="fault_code">131<a name="fault_131" id="fault_131"></a></span>:
+<span class="fault_desc">Invalid session ID.</span></li>
+<li><span class="fault_code">141<a name="fault_141" id="fault_141"></a></span>:
+<span class="fault_desc">Operation not allowed in the
+given security context.</span></li>
+<li><span class="fault_code">201<a name="fault_201" id="fault_201"></a></span>:
+<span class="fault_desc">Invalid API login or password.</span></li>
+<li><span class="fault_code">241<a name="fault_241" id="fault_241"></a></span>:
+<span class="fault_desc">Nonexistent organization.</span></li>
+<li><span class="fault_code">271<a name="fault_271" id="fault_271"></a></span>:
+<span class="fault_desc">User ID does not exist.</span></li>
+<li><span class="fault_code">285<a name="fault_285" id="fault_285"></a></span>:
+<span class="fault_desc">User login already taken by
+another user.</span></li>
+<li><span class="fault_code">291<a name="fault_291" id="fault_291"></a></span>:
+<span class="fault_desc">Email address does not exist
+for this user.</span></li>
+<li><span class="fault_code">292<a name="fault_292" id="fault_292"></a></span>:
+<span class="fault_desc">Email address already exists
+for this user.</span></li>
+<li><span class="fault_code">295<a name="fault_295" id="fault_295"></a></span>:
+<span class="fault_desc">This email is already used as a
+secondary email.</span></li>
+<li><span class="fault_code">296<a name="fault_296" id="fault_296"></a></span>:
+<span class="fault_desc">Cannot delete primary email
+addresses.</span></li>
+<h2>Examples<a name="examples" id="examples"></a></h2>
+<h3>Exemple 1<a name="code_example1" id="code_example1"></a></h3>
+<div class="source_code">
+<pre>#!/usr/bin/env python<br /><br />import sys, os, xmlrpclib<br /><br /># This is the url for the KPS API.<br />rpc_url = "https://172.16.100.42:8000/kpsapi.py"<br /><br /># These are the login and password that are set in the KPS API configuration file.<br /># This login is in the "org" security context. It is bound to an organization ID<br />#&nbsp;(set in the KPS API configuration file).<br />rpc_login = "client1"<br />rpc_password = "eeee"<br /><br />def print_and_return_user(rpc_server, rpc_sid, str_org_id):<br /> # List current users.<br /> users_list = rpc_server.list_org_users(rpc_sid, str_org_id)<br /> print "Current users: %s" % ( str(users_list) )<br /> return users_list<br /><br />def print_and_return_user_emails(rpc_server, rpc_sid, str_user_id):<br /> # List current users.<br /> emails_list = rpc_server.list_user_emails(rpc_sid, str_user_id)<br /> print "Current emails for user %s: %s" % ( str_user_id, str(emails_list) )<br /> return emails_list<br /><br /># Connect to the XML RPC server.<br />print "Connecting to the XML RPC server using url '%s' with login '%s' and password '%s'" % \<br />    ( rpc_url, rpc_login, rpc_password )<br />rpc_server = xmlrpclib.ServerProxy(rpc_url)<br />print "Connected to the XML RPC server."<br /><br /># Authenticate to the XMLRPC server and get a session ID.<br />rpc_sid = rpc_server.session_login(rpc_login, rpc_password)<br />print "Session ID: %s" % ( rpc_sid )<br /><br /># Get the organization ID to which user "client1" is bound to.<br /># org_id is a sint(64) so convert it back to int(64) to store locally.<br />str_org_id = rpc_server.get_security_context_org_id(rpc_sid)<br />org_id = long(str_org_id)<br />print "Organization ID: %i" % ( org_id )<br /><br /># TMP<br />#rpc_server.remove_user(rpc_sid, 142)<br /><br /># List current users.<br />print_and_return_user(rpc_server, rpc_sid, str_org_id)<br /><br /># Add a user and get its user ID.<br /># user_id is a sint(64) so convert it back to int(64) to store locally.<br />str_user_id = rpc_server.add_user(rpc_sid, str_org_id, "Foo bar", "foo@bar", "foologin", <br />    "foopassword")<br />user_id = long(str_user_id)<br />print "Added a user with user_id %i." % ( user_id )<br /><br /># List emails associated to that user.<br />print_and_return_user_emails(rpc_server, rpc_sid, str_user_id)<br /><br /># List current users.<br />print_and_return_user(rpc_server, rpc_sid, str_org_id)<br /><br /># Modify user.<br />rpc_server.modify_user(rpc_sid, str_user_id, "Foo Bar", "foo@bar", "foologin", "fdslj398ggsfd")<br /># List current users.<br />print_and_return_user(rpc_server, rpc_sid, str_org_id)<br /><br /># Add a secondary email to the user.<br />rpc_server.add_user_email(rpc_sid, str_user_id, "foo2@bar")<br />print "Added email foo2@bar to user %i." % ( user_id )<br /><br /># List emails associated to that user.<br />print_and_return_user_emails(rpc_server, rpc_sid, str_user_id)<br /><br /># Remove a secondary email from the user.<br />rpc_server.remove_user_email(rpc_sid, str_user_id, "foo2@bar")<br />print "Removed email foo2@bar from user %i." % ( user_id )<br /><br /># List emails associated to that user.<br />print_and_return_user_emails(rpc_server, rpc_sid, str_user_id)<br /><br /># Remove the user<br />rpc_server.remove_user(rpc_sid, user_id);<br />print "Removed user with user_id %i." % ( user_id )<br /><br /># List current users.<br />print_and_return_user(rpc_server, rpc_sid, str_org_id)</pre>
+</div>
+<pre>&nbsp;</pre>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</body></html>

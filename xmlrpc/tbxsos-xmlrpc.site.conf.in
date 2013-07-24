@@ -1,0 +1,13 @@
+Alias /api/ $WWWDIR/
+
+<Directory $WWWDIR/>
+    AllowOverride None
+    Options -Indexes
+    Order allow,deny
+    Allow from all
+    
+    SetEnv PYTHONPATH $PYTHONDIR
+
+    AddHandler cgi-script .py
+    Options +FollowSymLinks +ExecCGI
+</Directory>
