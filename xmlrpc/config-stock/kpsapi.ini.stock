@@ -1,0 +1,112 @@
+[main]
+# This is the main KPS Api configuration.
+
+# Do not change!
+config_version = 2.0
+
+[db]
+db_host = localhost
+db_port = 5432
+db_name = tbxsos_xmlrpc
+db_user = xmlrpc
+db_pwd = xmlrpc_replace_this_pwd
+
+freemium_db_host = localhost
+freemium_db_port = 5432
+freemium_db_name = freemium
+freemium_db_user = freemium
+freemium_db_pwd = freemium_replace_this_pwd
+
+# This is the configuration for login "admin".
+# This is a template for an admin login.
+# It is disabled by default (no password).
+[admin]
+
+# Security context
+# This must be "admin" or "org". The "admin" security context grants access to all the API.
+# The "org" security context grants changes to a single organization only. The "org_id" parameter
+# is mandatory for a user with the "org" security context.
+#security_ctx = admin
+
+# Organization ID.
+# This limits powers of this login to change only this organization.
+# It is mandatory and valid only when security context is set to "org".
+#org_id = 
+
+# Key ID.
+# Specify a key ID to use. If not set, the main kps key ID will be used.
+#key_id =
+
+# Password to use when logging into the API.
+# An empty password disables the login.
+#password = 
+
+# This is the configuration for login "client1".
+# This is a template for an organization login.
+# It is disabled by default (no password).
+#[client1]
+
+# Security context
+# This must be "admin" or "org". The "admin" security context grants access to all the API.
+# The "org" security context grants changes to a single organization only. The "org_id" parameter
+# is mandatory for a user with the "org" security context.
+#security_ctx = org
+
+# Organization ID.
+# This limits powers of this login to change only this organization.
+# It is mandatory and valid only when security context is set to "org".
+#org_id = 1
+
+# Key ID.
+# Specify a key ID to use. If not set, the main kps key ID will be used.
+#key_id = 
+
+# Password to use when logging into the API.
+# An empty password disables the login.
+#password =
+
+[freemium]
+password = hard-coded-pass
+security_ctx = org
+org_id = 1
+
+[loggers]
+keys = tbxsosxmlrpc,root
+
+[handlers]
+keys = syslog
+
+[formatters]
+keys = generic,formsyslog
+
+[logger_root]
+level = WARNING
+handlers = syslog
+
+[logger_tbxsosxmlrpc]
+level = WARNING
+handlers = syslog
+qualname = tbxsos-xmlrpc
+propagate = 0
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[handler_syslog]
+class=handlers.SysLogHandler
+level=NOTSET
+#args=(("localhost",handlers.SYSLOG_UDP_PORT),handlers.SysLogHandler.LOG_LOCAL0)
+args=("/dev/log",handlers.SysLogHandler.LOG_LOCAL0)
+formatter=formsyslog
+
+[formatter_generic]
+format = %(asctime)s,%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+
+[formatter_formsyslog]
+format = tbxsos-xmlrpc %(asctime)s,%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+

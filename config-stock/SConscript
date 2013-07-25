@@ -1,0 +1,31 @@
+# hey emacs, this is -*- python -*-
+#
+# Copyright (C) 2006-2012 Opersys inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os, socket
+Import('env conf_options')
+
+config_files = env.Glob("*.conf");
+
+server_conf = env.Substfile("server.conf.in",
+                            SUBST_DICT = {'\$HOSTNAME': socket.gethostname() })
+ssl_conf = env.Substfile("ssl.conf.in",
+                         SUBST_DICT = {'\$CONFDIR': env['CONFDIR'] })
+
+for cf in config_files:
+    env.Install(dir = env['CONFDIR'], target = cf)
+
+env.Install(target = env['CONFDIR'], source = server_conf)
+env.Install(target = env['CONFDIR'], source = ssl_conf)

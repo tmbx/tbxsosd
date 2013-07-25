@@ -1,3 +1,4 @@
+# hey emacs, this is -*- python -*-
 #
 # Copyright (C) 2006-2012 Opersys inc.
 # 
@@ -13,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# hey emacs, this is -*- python -*-
 import commands, os, sys, glob, re
 
 # Per Laurent Birtz example.
@@ -26,8 +26,8 @@ opts.AddVariables(
                ['tbxsos', 'eks', 'iks', 'full', 'kos', 'keyserver']),
     BoolVariable('mudflap', 'Build with mudflap (gcc 4.x)', 0),
     BoolVariable('mpatrol', 'Build with mpatrol', 0),
-    BoolVariable('debug', 'Compile with all debug options turned on', 1),
-    BoolVariable('db_debug', 'Compile with database debug option', 1),
+    BoolVariable('debug', 'Compile with all debug options turned on', 0),
+    BoolVariable('db_debug', 'Compile with database debug option', 0),
     BoolVariable('single_dir', 'Install everything in the same directory', 0),
     ('libktools_include', 'Location of include files for libktools', '#../libktools/src'),
     ('libktools_libpath', 'Location of library files for libktools', '#../libktools/build'),
@@ -37,14 +37,16 @@ opts.AddVariables(
     ('PREFIX', 'Architecture-independant files prefix', '/usr'),
     ('CONFDIR', 'Configuration file path', '/etc'),
     ('BINDIR', 'Executable path', '/usr/bin'),
-    ('PYTHONDIR', 'Path to Python libraries.', '/usr/share/python'))
+    ('DBDIR', 'Directory where to copy the database (.sqlpy) files.', '/usr/share/teambox/db'),
+    ('WWWDIR', 'Root directory of the web applications', '/usr/share/teambox/www'),
+    ('PYTHONDIR', 'Path to Python libraries.', '/usr/share/teambox/python'))
 
 #
 # Environment setup.
 #
 
 # Setup the build environment.
-env = Environment(options = opts)
+env = Environment(tools = ['default', 'textfile'], options = opts)
 opts.Save('build.conf', env)
 
 # Generate the help text.
@@ -71,7 +73,8 @@ if env['debug']:
     env['CPPDEFINES'] += ['KD_DEBUG', 'APR_POOL_DEBUG=7']
 else:
     conf_options['debug'] = 0
-    env['CCFLAGS'] += ['-O2']
+    env['LINKFLAGS'] +=  ['-g']
+    env['CCFLAGS'] += ['-g', '-g3', '-O2']
 
 #
 # Build configuration.
@@ -198,15 +201,19 @@ bc = conf_options['build_conf']
 
 # Check the paths.
 if env['single_dir']:
-    prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
-    confdir = prefix
-    bindir  = prefix
-    pydir = prefix
+    prefix  = Dir(os.path.join(str(env['DESTDIR']), str(env['PREFIX'])))
+    confdir = Dir(prefix)
+    bindir  = Dir(prefix)
+    dbdir = Dir(prefix)
+    pydir = Dir(prefix)
+    wwwdir = Dir(prefix)
 else:
-    prefix  = os.path.join(str(env['DESTDIR']), str(env['PREFIX']))
-    confdir = os.path.join(prefix, str(env['CONFDIR']))
-    bindir  = os.path.join(prefix, str(env['BINDIR']))
-    pydir = os.path.join(prefix, str(env['PYTHONDIR']))
+    prefix  = Dir(os.path.join(str(env['DESTDIR']), str(env['PREFIX'])))
+    confdir = Dir(os.path.join(str(prefix), str(env['CONFDIR'])))
+    bindir  = Dir(os.path.join(str(prefix), str(env['BINDIR'])))
+    dbdir = Dir(os.path.join(str(prefix), str(env['DBDIR'])))
+    pydir = Dir(os.path.join(str(prefix), str(env['PYTHONDIR'])))
+    wwwdir = Dir(os.path.join(str(prefix), str(env['WWWDIR'])))
 #
 # Target linking.
 #
@@ -233,10 +240,17 @@ libcomm = SConscript('libcomm/SConscript',
                      src_dir = 'libcomm',
                      duplicate = 0)
 
+SConscript('db/SConscript',
+           exports = 'env dbdir',
+           duplicate = 0)
 SConscript('kctl/SConscript',
            exports = 'env conf_options prefix bindir confdir pydir',
-           src_dir = 'kctl',
            duplicate = 0)
+SConscript('config-stock/SConscript',
+           exports = 'env conf_options',
+           duplicate = 0)
+SConscript('init/SConscript', exports = 'env conf_options', duplicate = 0)
+SConscript('xmlrpc/SConscript', exports = 'env', duplicate = 0)
 
 # Main source
 SConscript('src/SConscript',
@@ -246,4 +260,7 @@ SConscript('src/SConscript',
            duplicate = 0)
         
 env.Alias('install', bindir)
-
+env.Alias('install', dbdir)
+env.Alias('install', pydir)
+env.Alias('install', confdir)
+env.Alias('install', wwwdir)
